@@ -2,9 +2,9 @@ author: Backl1ght
 
 AHU 算法用于判断两棵有根树是否同构。
 
-判断树同构外还有一种常见的做法是 [树哈希](/graph/tree-hash)。
+判断树同构外还有一种常见的做法是 [树哈希](tree-hash.md)。
 
-前置知识：[树基础](/graph/tree-basic)，[树的重心](/graph/tree-centroid)
+前置知识：[树基础](tree-basic.md)，[树的重心](tree-centroid.md)
 
 建议配合参考资料里给的例子观看。
 
@@ -38,9 +38,9 @@ $$
 
 对于无根树 $T_1(V_1, E_1)$ 和 $T_2(V_2,E_2)$，先分别找出它们的 **所有** 重心。
 
-- 如果这两棵无根树重心数量不同，那么这两棵树不同构。
-- 如果这两颗无根树重心数量都为 $1$，分别记为 $c_1$ 和 $c_2$，那么如果有根树 $T_1(V_1,E_1,c_1)$ 和有根树 $T_2(V_2,E_2,c_2)$ 同构，那么无根树 $T_1(V_1, E_1)$ 和 $T_2(V_2,E_2)$ 同构，反之则不同构。
-- 如果这两颗无根树重心数量都为 $2$，分别记为 $c_1,c^\prime_1$ 和 $c_2,c^\prime_2$，那么如果有根树 $T_1(V_1,E_1,c_1)$ 和有根树 $T_2(V_2,E_2,c_2)$ 同构 **或者** 有根树 $T_1(V_1,E_1,c^\prime_1)$ 和 $T_2(V_2,E_2,c_2)$ 同构，那么无根树 $T_1(V_1, E_1)$ 和 $T_2(V_2,E_2)$ 同构，反之则不同构。
+-   如果这两棵无根树重心数量不同，那么这两棵树不同构。
+-   如果这两颗无根树重心数量都为 $1$，分别记为 $c_1$ 和 $c_2$，那么如果有根树 $T_1(V_1,E_1,c_1)$ 和有根树 $T_2(V_2,E_2,c_2)$ 同构，那么无根树 $T_1(V_1, E_1)$ 和 $T_2(V_2,E_2)$ 同构，反之则不同构。
+-   如果这两颗无根树重心数量都为 $2$，分别记为 $c_1,c'_1$ 和 $c_2,c'_2$，那么如果有根树 $T_1(V_1,E_1,c_1)$ 和有根树 $T_2(V_2,E_2,c_2)$ 同构 **或者** 有根树 $T_1(V_1,E_1,c'_1)$ 和 $T_2(V_2,E_2,c_2)$ 同构，那么无根树 $T_1(V_1, E_1)$ 和 $T_2(V_2,E_2)$ 同构，反之则不同构。
 
 所以，只要解决了有根树同构问题，我们就可以把无根树同构问题根据上述方法转化成有根树同构的问题，进而解决无根树同构的问题。
 
@@ -66,37 +66,39 @@ $$
 
 ### 命名算法
 
-$$
-\begin{array}{ll}
-1 & \textbf{Input. } \text{A rooted tree }T\\
-2 & \textbf{Output. } \text{The name of rooted tree }T\\
-3 & \text{ASSIGN-NAME(u)}\\
-4 & \qquad \text{if  } u \text{  is a leaf}\\
-5 & \qquad \qquad \text{NAME(} u \text{) = (0)}\\
-6 & \qquad \text{else }\\
-7 & \qquad \qquad \text{for all child } v \text{ of } u\\
-8 & \qquad \qquad \qquad \text{ASSIGN-NAME(}v\text{)}\\
-9 & \qquad \text{sort the names of the children of }u\\
-10 & \qquad \text{concatenate the names of all children }u\text{ to temp}\\
-11 & \qquad \text{NAME(} u \text{) = (temp)}
-\end{array}
-$$
+???+ note "实现"
+    $$
+    \begin{array}{ll}
+    1 & \textbf{Input. } \text{A rooted tree }T\\
+    2 & \textbf{Output. } \text{The name of rooted tree }T\\
+    3 & \text{ASSIGN-NAME(u)}\\
+    4 & \qquad \text{if  } u \text{  is a leaf}\\
+    5 & \qquad \qquad \text{NAME(} u \text{) = (0)}\\
+    6 & \qquad \text{else }\\
+    7 & \qquad \qquad \text{for all child } v \text{ of } u\\
+    8 & \qquad \qquad \qquad \text{ASSIGN-NAME(}v\text{)}\\
+    9 & \qquad \text{sort the names of the children of }u\\
+    10 & \qquad \text{concatenate the names of all children }u\text{ to temp}\\
+    11 & \qquad \text{NAME(} u \text{) = (temp)}
+    \end{array}
+    $$
 
 ### AHU 算法
 
-$$
-\begin{array}{ll}
-1 & \textbf{Input. } \text{Two rooted trees }T_1(V_1,E_1,r_1)\text{ and }T_2(V_2,E_2,r_2) \\
-2 & \textbf{Output. } \text{Whether these two trees are isomorphic}\\
-3 & \text{AHU}(T_1(V_1,E_1,r_1), T_2(V_2,E_2,r_2))\\
-4 & \qquad \text{ASSIGN-NAME(}r_1\text{)}\\
-5 & \qquad \text{ASSIGN-NAME(}r_2\text{)}\\
-6 & \qquad \text{if  NAME}(r_1) = \text{NAME}(r_2)\\
-7 & \qquad \qquad \text{return true}\\
-8 & \qquad \text{else}\\
-10 & \qquad \qquad \text{return false}
-\end{array}
-$$
+???+ note "实现"
+    $$
+    \begin{array}{ll}
+    1 & \textbf{Input. } \text{Two rooted trees }T_1(V_1,E_1,r_1)\text{ and }T_2(V_2,E_2,r_2) \\
+    2 & \textbf{Output. } \text{Whether these two trees are isomorphic}\\
+    3 & \text{AHU}(T_1(V_1,E_1,r_1), T_2(V_2,E_2,r_2))\\
+    4 & \qquad \text{ASSIGN-NAME(}r_1\text{)}\\
+    5 & \qquad \text{ASSIGN-NAME(}r_2\text{)}\\
+    6 & \qquad \text{if  NAME}(r_1) = \text{NAME}(r_2)\\
+    7 & \qquad \qquad \text{return true}\\
+    8 & \qquad \text{else}\\
+    10 & \qquad \qquad \text{return false}
+    \end{array}
+    $$
 
 ### 复杂度证明
 
@@ -126,8 +128,8 @@ $$
 
 首先注意到第 $i$ 层由拼接得到的 $NAME$ 的总长度为第 $i$ 层点的度数之和，即第 $i+1$ 层的总点数，以下用 $L_i$ 表示。算法的下一步会将这些 $NAME$ 看成字符串（数组）并排序，然后将它们替换为其在层内的排名（即重新映射为一个数）。以下引理表明了对总长为 $L$ 的 $m$ 个字符串排序的复杂度：
 
-1. 我们可以使用基数排序在 $O(L+|\Sigma|)$ 的时间内完成排序，其中 $|\Sigma|$ 为字符集的大小。（有一些实现细节，参见参考资料）
-2. 我们可以使用快速排序在 $O(L \log m)$ 的时间内完成排序。证明的大致思路为快排递归树的高度为 $O(\log m)$，且暴力比较长度为 $\ell_1$ 和 $\ell_2$ 的两个字符串的复杂度为 $O(\min\{\ell_1,\ell_2\})$。
+1.  我们可以使用基数排序在 $O(L+|\Sigma|)$ 的时间内完成排序，其中 $|\Sigma|$ 为字符集的大小。（有一些实现细节，参见参考资料）
+2.  我们可以使用快速排序在 $O(L \log m)$ 的时间内完成排序。证明的大致思路为快排递归树的高度为 $O(\log m)$，且暴力比较长度为 $\ell_1$ 和 $\ell_2$ 的两个字符串的复杂度为 $O(\min\{\ell_1,\ell_2\})$。
 
 在 AHU 算法中，第 $i$ 层字符串的字符集大小最多为第 $i+1$ 层的点数，即 $L_i$，所以基数排序的复杂度是线性的。根据 $\sum_i L_i=O(n)$，并将每层的复杂度相加后可以看出，若使用字符串的基数排序，则算法的总复杂度为 $T(n)=O(n)$。同理，如果使用快排排序字符串，那么 $T(n)=O(n \log n)$。
 
@@ -139,7 +141,7 @@ $$
 
 ???+ note "参考代码"
     ```cpp
-      --8<-- "docs/graph/code/tree-ahu/tree-ahu_1.cpp"
+    --8<-- "docs/graph/code/tree-ahu/tree-ahu_1.cpp"
     ```
 
 ## 参考资料

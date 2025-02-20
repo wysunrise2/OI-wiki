@@ -1,7 +1,7 @@
 ## 第二类斯特林数（Stirling Number）
 
 ??? note "为什么先介绍第二类斯特林数"
-    虽然被称作“第二类”，第二类斯特林数却在斯特林的相关著作和具体数学中被首先描述，同时也比第一类斯特林数常用得多。
+    虽然被称作「第二类」，第二类斯特林数却在斯特林的相关著作和具体数学中被首先描述，同时也比第一类斯特林数常用得多。
 
 **第二类斯特林数**（斯特林子集数）$\begin{Bmatrix}n\\ k\end{Bmatrix}$，也可记做 $S(n,k)$，表示将 $n$ 个两两不同的元素，划分为 $k$ 个互不区分的非空子集的方案数。
 
@@ -17,8 +17,8 @@ $$
 
 我们插入一个新元素时，有两种方案：
 
-- 将新元素单独放入一个子集，有 $\begin{Bmatrix}n-1\\ k-1\end{Bmatrix}$ 种方案；
-- 将新元素放入一个现有的非空子集，有 $k\begin{Bmatrix}n-1\\ k\end{Bmatrix}$ 种方案。
+-   将新元素单独放入一个子集，有 $\begin{Bmatrix}n-1\\ k-1\end{Bmatrix}$ 种方案；
+-   将新元素放入一个现有的非空子集，有 $k\begin{Bmatrix}n-1\\ k\end{Bmatrix}$ 种方案。
 
 根据加法原理，将两式相加即可得到递推式。
 
@@ -28,13 +28,15 @@ $$
 \begin{Bmatrix}n\\m\end{Bmatrix}=\sum\limits_{i=0}^m\dfrac{(-1)^{m-i}i^n}{i!(m-i)!}
 $$
 
-使用容斥原理证明该公式。设将 $n$ 个两两不同的元素，划分到 $k$ 个两两不同的集合（允许空集）的方案数为 $G_i$，将 $n$ 个两两不同的元素，划分到 $k$ 个两两不同的非空集合（不允许空集）的方案数为 $F_i$。
+使用容斥原理证明该公式。设将 $n$ 个两两不同的元素，划分到 $i$ 个两两不同的集合（允许空集）的方案数为 $G_i$，将 $n$ 个两两不同的元素，划分到 $i$ 个两两不同的非空集合（不允许空集）的方案数为 $F_i$。
 
 显然
 
 $$
-G_i=k^n\\
-G_i=\sum\limits_{j=0}^i\binom{i}{j}F_j
+\begin{aligned}
+G_i&=i^n\\
+G_i&=\sum\limits_{j=0}^i\binom{i}{j}F_j
+\end{aligned}
 $$
 
 根据二项式反演
@@ -55,15 +57,13 @@ $$
 
 ### 同一行第二类斯特林数的计算
 
-“同一行”的第二类斯特林数指的是，有着不同的 $i$，相同的 $n$ 的一系列 $\begin{Bmatrix}n\\i\end{Bmatrix}$。求出同一行的所有第二类斯特林数，就是对 $i=0..n$ 求出了将 $n$ 个不同元素划分为 $i$ 个非空集的方案数。
-
-#### 方法 1. 直接利用通项公式
+「同一行」的第二类斯特林数指的是，有着不同的 $i$，相同的 $n$ 的一系列 $\begin{Bmatrix}n\\i\end{Bmatrix}$。求出同一行的所有第二类斯特林数，就是对 $i=0..n$ 求出了将 $n$ 个不同元素划分为 $i$ 个非空集的方案数。
 
 根据上面给出的通项公式，卷积计算即可。该做法的时间复杂度为 $O(n \log n)$。
 
 下面的代码使用了名为 `poly` 的多项式类，仅供参考。
 
-??? note "参考代码"
+??? note "实现"
     ```cpp
     #ifndef _FEISTDLIB_POLY_
     #define _FEISTDLIB_POLY_
@@ -81,7 +81,7 @@ $$
     
     namespace fstdlib {
     
-    typedef long long ll;
+    using ll = long long;
     int mod = 998244353, grt = 3;
     
     class poly {
@@ -637,50 +637,60 @@ $$
       return f;
     }
     
-    typedef arbitrary_module_poly m_poly;
+    using m_poly = arbitrary_module_poly;
     }  // namespace fstdlib
     
     #endif
     ```
 
-```cpp
-int main() {
-  scanf("%d", &n);
-  fact[0] = 1;
-  for (int i = 1; i <= n; ++i) fact[i] = (ll)fact[i - 1] * i % mod;
-  exgcd(fact[n], mod, ifact[n], ifact[0]),
-      ifact[n] = (ifact[n] % mod + mod) % mod;
-  for (int i = n - 1; i >= 0; --i) ifact[i] = (ll)ifact[i + 1] * (i + 1) % mod;
-  poly f(n + 1), g(n + 1);
-  for (int i = 0; i <= n; ++i)
-    g[i] = (i & 1 ? mod - 1ll : 1ll) * ifact[i] % mod,
-    f[i] = (ll)qpow(i, n) * ifact[i] % mod;
-  f *= g, f.resize(n + 1);
-  for (int i = 0; i <= n; ++i) printf("%d ", f[i]);
-  return 0;
-}
-```
+???+ note "实现"
+    ```cpp
+    int main() {
+      scanf("%d", &n);
+      fact[0] = 1;
+      for (int i = 1; i <= n; ++i) fact[i] = (ll)fact[i - 1] * i % mod;
+      exgcd(fact[n], mod, ifact[n], ifact[0]),
+          ifact[n] = (ifact[n] % mod + mod) % mod;
+      for (int i = n - 1; i >= 0; --i) ifact[i] = (ll)ifact[i + 1] * (i + 1) % mod;
+      poly f(n + 1), g(n + 1);
+      for (int i = 0; i <= n; ++i)
+        g[i] = (i & 1 ? mod - 1ll : 1ll) * ifact[i] % mod,
+        f[i] = (ll)qpow(i, n) * ifact[i] % mod;
+      f *= g, f.resize(n + 1);
+      for (int i = 0; i <= n; ++i) printf("%d ", f[i]);
+      return 0;
+    }
+    ```
 
-#### 方法 2. 利用指数型生成函数
+### 同一列第二类斯特林数的计算
 
-一个盒子装 $i$ 个物品且盒子非空的方案数是 $[i>0]$。我们可以写出它的指数型生成函数为 $F(x)=\sum\limits_{i=1}^{+\infty}\dfrac{x^i}{i!} = e^x-1$。经过之前的学习，我们明白 $F^k(x)$ 就是 $i$ 个有标号物品放到 $k$ 个有标号盒子里的指数型生成函数，$\exp F(x)=\sum\limits_{i=0}^{+\infty}\dfrac{F^i(x)}{i!}$ 就是 $i$ 个有标号物品放到任意多个无标号盒子里的指数型生成函数（EXP 通过每项除以一个 $i!$ 去掉了盒子的标号）。这里涉及到很多“有标号”“无标号”的内容，注意辨析。
+「同一列」的第二类斯特林数指的是，有着不同的 $i$，相同的 $k$ 的一系列 $\begin{Bmatrix}i\\k\end{Bmatrix}$。求出同一列的所有第二类斯特林数，就是对 $i=0..n$ 求出了将 $i$ 个不同元素划分为 $k$ 个非空集的方案数。
 
-那么 $\begin{Bmatrix}i\\k\end{Bmatrix}=\dfrac{\left[\dfrac{x^i}{i!}\right]F^k(x)}{k!}$，$O(n\log n)$ 计算多项式幂即可。实际使用时比 $O(n\log n)$ 的方法 1 要慢。
+利用指数型生成函数计算。
 
-```cpp
-int main() {
-  scanf("%d%d", &n, &k);
-  poly f(n + 1);
-  fact[0] = 1;
-  for (int i = 1; i <= n; ++i) fact[i] = (ll)fact[i - 1] * i % mod;
-  for (int i = 1; i <= n; ++i) f[i] = qpow(fact[i], mod - 2);
-  f = exp(log(f >> 1) * k) << k, f.resize(n + 1);
-  int inv = qpow(fact[k], mod - 2);
-  for (int i = 0; i <= n; ++i)
-    printf("%lld ", (ll)f[i] * fact[i] % mod * inv % mod);
-  return 0;
-}
-```
+一个盒子装 $i$ 个物品且盒子非空的方案数是 $[i>0]$。我们可以写出它的指数型生成函数为 $F(x)=\sum\limits_{i=1}^{+\infty}\dfrac{x^i}{i!} = \mathrm{e}^x-1$。经过之前的学习，我们明白 $F^k(x)$ 就是 $i$ 个有标号物品放到 $k$ 个有标号盒子里的指数型生成函数，那么除掉 $k!$ 就是 $i$ 个有标号物品放到 $k$ 个无标号盒子里的指数型生成函数。
+
+$\begin{Bmatrix}i\\k\end{Bmatrix}=\dfrac{\left[\dfrac{x^i}{i!}\right]F^k(x)}{k!}$，$O(n\log n)$ 计算多项式幂即可。
+
+另外，$\exp F(x)=\sum\limits_{i=0}^{+\infty}\dfrac{F^i(x)}{i!}$ 就是 $i$ 个有标号物品放到任意多个无标号盒子里的指数型生成函数（EXP 通过每项除以一个 $i!$ 去掉了盒子的标号）。这其实就是贝尔数的生成函数。
+
+这里涉及到很多「有标号」「无标号」的内容，注意辨析。
+
+???+ note "实现"
+    ```cpp
+    int main() {
+      scanf("%d%d", &n, &k);
+      poly f(n + 1);
+      fact[0] = 1;
+      for (int i = 1; i <= n; ++i) fact[i] = (ll)fact[i - 1] * i % mod;
+      for (int i = 1; i <= n; ++i) f[i] = qpow(fact[i], mod - 2);
+      f = exp(log(f >> 1) * k) << k, f.resize(n + 1);
+      int inv = qpow(fact[k], mod - 2);
+      for (int i = 0; i <= n; ++i)
+        printf("%lld ", (ll)f[i] * fact[i] % mod * inv % mod);
+      return 0;
+    }
+    ```
 
 ## 第一类斯特林数（Stirling Number）
 
@@ -700,8 +710,8 @@ $$
 
 我们插入一个新元素时，有两种方案：
 
-- 将该新元素置于一个单独的轮换中，共有 $\begin{bmatrix}n-1\\ k-1\end{bmatrix}$ 种方案；
-- 将该元素插入到任何一个现有的轮换中，共有 $(n-1)\begin{bmatrix}n-1\\ k\end{bmatrix}$ 种方案。
+-   将该新元素置于一个单独的轮换中，共有 $\begin{bmatrix}n-1\\ k-1\end{bmatrix}$ 种方案；
+-   将该元素插入到任何一个现有的轮换中，共有 $(n-1)\begin{bmatrix}n-1\\ k\end{bmatrix}$ 种方案。
 
 根据加法原理，将两式相加即可得到递推式。
 
@@ -723,7 +733,7 @@ $F_n(x)=(n-1)F_{n-1}(x)+xF_{n-1}(x)$
 
 $F_n(x)=\prod\limits_{i=0}^{n-1}(x+i)=\dfrac{(x+n-1)!}{(x-1)!}$
 
-这其实是 $x$ 的 $n$ 次上升阶乘幂，记做 $x^{\overline n}$。这个东西自然是可以暴力分治乘 $O(n\log^2n)$ 求出的，但用上升幂相关做法可以 $O(n\log n)$ 求出。
+这其实是 $x$ 的 $n$ 次上升阶乘幂，记做 $x^{\overline n}$。这个东西自然是可以暴力分治乘 $O(n\log^2n)$ 求出的，但用上升幂相关做法可以 $O(n\log n)$ 求出，详情见 [多项式平移 | 连续点值平移](../poly/shift.md#同一行第一类无符号-stirling-数)。
 
 ### 同一列第一类斯特林数的计算
 
@@ -735,21 +745,22 @@ $F(x)=\sum\limits_{i=1}^n\dfrac{(i-1)!x^i}{i!}=\sum\limits_{i=1}^n\dfrac{x^i}{i}
 
 它的 $k$ 次幂就是 $\begin{bmatrix}i\\k\end{bmatrix}$ 的指数型生成函数，$O(n\log n)$ 计算即可。
 
-```cpp
-int main() {
-  scanf("%d%d", &n, &k);
-  fact[0] = 1;
-  for (int i = 1; i <= n; ++i) fact[i] = (ll)fact[i - 1] * i % mod;
-  ifact[n] = qpow(fact[n], mod - 2);
-  for (int i = n - 1; i >= 0; --i) ifact[i] = (ll)ifact[i + 1] * (i + 1) % mod;
-  poly f(n + 1);
-  for (int i = 1; i <= n; ++i) f[i] = (ll)fact[i - 1] * ifact[i] % mod;
-  f = exp(log(f >> 1) * k) << k, f.resize(n + 1);
-  for (int i = 0; i <= n; ++i)
-    printf("%lld ", (ll)f[i] * fact[i] % mod * ifact[k] % mod);
-  return 0;
-}
-```
+???+ note "实现"
+    ```cpp
+    int main() {
+      scanf("%d%d", &n, &k);
+      fact[0] = 1;
+      for (int i = 1; i <= n; ++i) fact[i] = (ll)fact[i - 1] * i % mod;
+      ifact[n] = qpow(fact[n], mod - 2);
+      for (int i = n - 1; i >= 0; --i) ifact[i] = (ll)ifact[i + 1] * (i + 1) % mod;
+      poly f(n + 1);
+      for (int i = 1; i <= n; ++i) f[i] = (ll)fact[i - 1] * ifact[i] % mod;
+      f = exp(log(f >> 1) * k) << k, f.resize(n + 1);
+      for (int i = 0; i <= n; ++i)
+        printf("%lld ", (ll)f[i] * fact[i] % mod * ifact[k] % mod);
+      return 0;
+    }
+    ```
 
 ## 应用
 
@@ -819,11 +830,11 @@ $$
 
 ## 习题
 
-- [HDU3625 Examining the Rooms](https://vjudge.net/problem/HDU-3625)
-- [UOJ540 联合省选 2020 组合数问题](https://uoj.ac/problem/540)
-- [UOJ269 清华集训 2016 如何优雅地求和](https://uoj.ac/problem/269)
+-   [HDU3625 Examining the Rooms](https://acm.hdu.edu.cn/showproblem.php?pid=3625)
+-   [UOJ540 联合省选 2020 组合数问题](https://uoj.ac/problem/540)
+-   [UOJ269 清华集训 2016 如何优雅地求和](https://uoj.ac/problem/269)
 
 ## 参考资料与注释
 
-1. [Stirling Number of the First Kind - Wolfram MathWorld](http://mathworld.wolfram.com/StirlingNumberoftheFirstKind.html)
-2. [Stirling Number of the Second Kind - Wolfram MathWorld](http://mathworld.wolfram.com/StirlingNumberoftheSecondKind.html)
+1.  [Stirling Number of the First Kind - Wolfram MathWorld](http://mathworld.wolfram.com/StirlingNumberoftheFirstKind.html)
+2.  [Stirling Number of the Second Kind - Wolfram MathWorld](http://mathworld.wolfram.com/StirlingNumberoftheSecondKind.html)

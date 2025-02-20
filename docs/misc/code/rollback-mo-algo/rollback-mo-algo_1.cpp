@@ -1,7 +1,9 @@
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <cmath>
+#include <iostream>
 using namespace std;
-typedef long long ll;
-const int N = 1e5 + 5;
+using ll = long long;
+constexpr int N = 1e5 + 5;
 int n, q;
 int x[N], t[N], m;
 
@@ -13,7 +15,7 @@ int pos[N], L[N], R[N], sz, tot;
 int cnt[N], __cnt[N];
 ll ans[N];
 
-inline bool cmp(const Query& A, const Query& B) {
+bool cmp(const Query& A, const Query& B) {
   if (pos[A.l] == pos[B.l]) return A.r < B.r;
   return pos[A.l] < pos[B.l];
 }
@@ -32,17 +34,18 @@ void build() {
   }
 }
 
-inline void Add(int v, ll& Ans) {
+void Add(int v, ll& Ans) {
   ++cnt[v];
   Ans = max(Ans, 1LL * cnt[v] * t[v]);
 }
 
-inline void Del(int v) { --cnt[v]; }
+void Del(int v) { --cnt[v]; }
 
 int main() {
-  scanf("%d %d", &n, &q);
-  for (int i = 1; i <= n; i++) scanf("%d", &x[i]), t[++m] = x[i];
-  for (int i = 1; i <= q; i++) scanf("%d %d", &Q[i].l, &Q[i].r), Q[i].id = i;
+  cin.tie(nullptr)->sync_with_stdio(false);
+  cin >> n >> q;
+  for (int i = 1; i <= n; i++) cin >> x[i], t[++m] = x[i];
+  for (int i = 1; i <= q; i++) cin >> Q[i].l >> Q[i].r, Q[i].id = i;
 
   build();
 
@@ -88,6 +91,6 @@ int main() {
     // 回滚
     while (__l < l) Del(x[__l]), ++__l;
   }
-  for (int i = 1; i <= q; i++) printf("%lld\n", ans[i]);
+  for (int i = 1; i <= q; i++) cout << ans[i] << '\n';
   return 0;
 }
