@@ -172,8 +172,8 @@ $$
 
 $$
 \begin{aligned}
-B(z)e^z &= z+B(z)\\
-B(z)&=\dfrac{z}{e^z - 1}
+B(z)\mathrm{e}^z &= z+B(z)\\
+B(z)&=\dfrac{z}{\mathrm{e}^z - 1}
 \end{aligned}
 $$
 
@@ -191,17 +191,17 @@ $$
 $$
 \begin{aligned}
 F_n(z) &=\sum_{i=0}^{n-1}\sum_{m\ge 0}\dfrac{i^mz^m}{m!}\\
-       &=\sum_{i=0}^{n-1}e^{iz}\\
-       &=\dfrac{e^{nz} - 1}{e^z - 1}\\
-       &=\dfrac{z}{e^z - 1}\cdot\dfrac{e^{nz} - 1}{z}
+       &=\sum_{i=0}^{n-1}\mathrm{e}^{iz}\\
+       &=\dfrac{\mathrm{e}^{nz} - 1}{\mathrm{e}^z - 1}\\
+       &=\dfrac{z}{\mathrm{e}^z - 1}\cdot\dfrac{\mathrm{e}^{nz} - 1}{z}
 \end{aligned}
 $$
 
-代入 $B(z)=\dfrac{z}{e^z - 1}$：
+代入 $B(z)=\dfrac{z}{\mathrm{e}^z - 1}$：
 
 $$
 \begin{aligned}
-F_n(z) &= B(z)\cdot\dfrac{e^{nz} - 1}{z}\\
+F_n(z) &= B(z)\cdot\dfrac{\mathrm{e}^{nz} - 1}{z}\\
 &= \left(\sum_{i\ge 0}\dfrac{B_i}{i!} \right)\left(\sum_{i\ge 1}\dfrac{n^i z^{i - 1}}{i!}\right)\\
 &= \left(\sum_{i\ge 0}\dfrac{B_i}{i!} \right)\left(\sum_{i\ge 0}\dfrac{n^{i+1} z^{i}}{(i+1)!}\right)
 \end{aligned}
@@ -221,16 +221,16 @@ $$
 
 ??? note "参考实现"
     ```c++
-    typedef long long ll;
-    const int maxn = 10000;
-    const int mod = 1e9 + 7;
-    ll B[maxn];        // 伯努利数
-    ll C[maxn][maxn];  // 组合数
-    ll inv[maxn];      // 逆元（计算伯努利数）
+    using ll = long long;
+    constexpr int MAXN = 10000;
+    constexpr int mod = 1e9 + 7;
+    ll B[MAXN];        // 伯努利数
+    ll C[MAXN][MAXN];  // 组合数
+    ll inv[MAXN];      // 逆元（计算伯努利数）
     
     void init() {
       // 预处理组合数
-      for (int i = 0; i < maxn; i++) {
+      for (int i = 0; i < MAXN; i++) {
         C[i][0] = C[i][i] = 1;
         for (int k = 1; k < i; k++) {
           C[i][k] = (C[i - 1][k] % mod + C[i - 1][k - 1] % mod) % mod;
@@ -238,14 +238,14 @@ $$
       }
       // 预处理逆元
       inv[1] = 1;
-      for (int i = 2; i < maxn; i++) {
+      for (int i = 2; i < MAXN; i++) {
         inv[i] = (mod - mod / i) * inv[mod % i] % mod;
       }
       // 预处理伯努利数
       B[0] = 1;
-      for (int i = 1; i < maxn; i++) {
+      for (int i = 1; i < MAXN; i++) {
         ll ans = 0;
-        if (i == maxn - 1) break;
+        if (i == MAXN - 1) break;
         for (int k = 0; k < i; k++) {
           ans += C[i + 1][k] * B[k];
           ans %= mod;

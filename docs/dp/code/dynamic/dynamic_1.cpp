@@ -1,17 +1,17 @@
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <cstring>
+#include <iostream>
 
 using namespace std;
 
-typedef long long LL;
+constexpr int MAXN = 500010;
+constexpr int INF = 0x3f3f3f3f;
 
-const int maxn = 500010;
-const int INF = 0x3f3f3f3f;
-
-int Begin[maxn], Next[maxn], To[maxn], e, n, m;
-int size[maxn], son[maxn], top[maxn], fa[maxn], dis[maxn], p[maxn], id[maxn],
-    End[maxn];
+int Begin[MAXN], Next[MAXN], To[MAXN], e, n, m;
+int sz[MAXN], son[MAXN], top[MAXN], fa[MAXN], dis[MAXN], p[MAXN], id[MAXN],
+    End[MAXN];
 // p[i]表示i树剖后的编号，id[p[i]] = i
-int cnt, tot, a[maxn], f[maxn][2];
+int cnt, tot, a[MAXN], f[MAXN][2];
 
 struct matrix {
   int g[2][2];
@@ -27,26 +27,24 @@ struct matrix {
           c.g[i][j] = max(c.g[i][j], g[i][k] + b.g[k][j]);
     return c;
   }
-} Tree[maxn], g[maxn];  // Tree[]是建出来的线段树，g[]是维护的每个点的矩阵
+} Tree[MAXN], g[MAXN];  // Tree[]是建出来的线段树，g[]是维护的每个点的矩阵
 
-inline void PushUp(int root) {
-  Tree[root] = Tree[root << 1] * Tree[root << 1 | 1];
-}
+void PushUp(int root) { Tree[root] = Tree[root << 1] * Tree[root << 1 | 1]; }
 
-inline void Build(int root, int l, int r) {
+void Build(int root, int l, int r) {
   if (l == r) {
     Tree[root] = g[id[l]];
     return;
   }
-  int Mid = l + r >> 1;
+  int Mid = (l + r) >> 1;
   Build(root << 1, l, Mid);
   Build(root << 1 | 1, Mid + 1, r);
   PushUp(root);
 }
 
-inline matrix Query(int root, int l, int r, int L, int R) {
+matrix Query(int root, int l, int r, int L, int R) {
   if (L <= l && r <= R) return Tree[root];
-  int Mid = l + r >> 1;
+  int Mid = (l + r) >> 1;
   if (R <= Mid) return Query(root << 1, l, Mid, L, R);
   if (Mid < L) return Query(root << 1 | 1, Mid + 1, r, L, R);
   return Query(root << 1, l, Mid, L, R) *
@@ -54,12 +52,12 @@ inline matrix Query(int root, int l, int r, int L, int R) {
   // 注意查询操作的书写
 }
 
-inline void Modify(int root, int l, int r, int pos) {
+void Modify(int root, int l, int r, int pos) {
   if (l == r) {
     Tree[root] = g[id[l]];
     return;
   }
-  int Mid = l + r >> 1;
+  int Mid = (l + r) >> 1;
   if (pos <= Mid)
     Modify(root << 1, l, Mid, pos);
   else
@@ -67,7 +65,7 @@ inline void Modify(int root, int l, int r, int pos) {
   PushUp(root);
 }
 
-inline void Update(int x, int val) {
+void Update(int x, int val) {
   g[x].g[1][0] += val - a[x];
   a[x] = val;
   // 首先修改x的g矩阵
@@ -87,14 +85,14 @@ inline void Update(int x, int val) {
   }
 }
 
-inline void add(int u, int v) {
+void add(int u, int v) {
   To[++e] = v;
   Next[e] = Begin[u];
   Begin[u] = e;
 }
 
-inline void DFS1(int u) {
-  size[u] = 1;
+void DFS1(int u) {
+  sz[u] = 1;
   int Max = 0;
   f[u][1] = a[u];
   for (int i = Begin[u]; i; i = Next[i]) {
@@ -103,9 +101,9 @@ inline void DFS1(int u) {
     dis[v] = dis[u] + 1;
     fa[v] = u;
     DFS1(v);
-    size[u] += size[v];
-    if (size[v] > Max) {
-      Max = size[v];
+    sz[u] += sz[v];
+    if (sz[v] > Max) {
+      Max = sz[v];
       son[u] = v;
     }
     f[u][1] += f[v][0];
@@ -114,7 +112,7 @@ inline void DFS1(int u) {
   }
 }
 
-inline void DFS2(int u, int t) {
+void DFS2(int u, int t) {
   top[u] = t;
   p[u] = ++cnt;
   id[cnt] = u;
@@ -135,11 +133,12 @@ inline void DFS2(int u, int t) {
 }
 
 int main() {
-  scanf("%d%d", &n, &m);
-  for (int i = 1; i <= n; i++) scanf("%d", &a[i]);
+  cin.tie(nullptr)->sync_with_stdio(false);
+  cin >> n >> m;
+  for (int i = 1; i <= n; i++) cin >> a[i];
   for (int i = 1; i <= n - 1; i++) {
     int u, v;
-    scanf("%d%d", &u, &v);
+    cin >> u >> v;
     add(u, v);
     add(v, u);
   }
@@ -149,10 +148,10 @@ int main() {
   Build(1, 1, n);
   for (int i = 1; i <= m; i++) {
     int x, val;
-    scanf("%d%d", &x, &val);
+    cin >> x >> val;
     Update(x, val);
     matrix ans = Query(1, 1, n, 1, End[1]);  // 查询1所在重链的矩阵乘
-    printf("%d\n", max(ans.g[0][0], ans.g[1][0]));
+    cout << max(ans.g[0][0], ans.g[1][0]) << '\n';
   }
   return 0;
 }

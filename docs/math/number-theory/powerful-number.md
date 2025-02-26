@@ -5,9 +5,9 @@ Powerful Number（以下简称 PN）筛类似于杜教筛，或者说是杜教�
 **要求**：
 
 -   存在一个函数 $g$ 满足：
-    - $g$ 是积性函数。
-    - $g$ 易求前缀和。
-    - 对于质数 $p$，$g(p) = f(p)$。
+    -   $g$ 是积性函数。
+    -   $g$ 易求前缀和。
+    -   对于质数 $p$，$g(p) = f(p)$。
 
 假设现在要求积性函数 $f$ 的前缀和 $F(n) = \sum_{i=1}^{n} f(i)$。
 
@@ -42,7 +42,7 @@ $$
 $$
 \begin{aligned}
 F(n) &= \sum_{i = 1}^{n} f(i)\\
-     &= \sum_{i = 1}^{n} \sum_{d|i} h(i) g\left(\frac{i}{d}\right)\\
+     &= \sum_{i = 1}^{n} \sum_{d|i} h(d) g\left(\frac{i}{d}\right)\\
      &= \sum_{d=1}^{n} \sum_{i=1}^{\lfloor \frac{n}{d}\rfloor} h(d) g(i)\\
      &= \sum_{d=1}^{n} h(d) \sum_{i=1}^{\lfloor \frac{n}{d}\rfloor}  g(i) \\
      &= \sum_{d=1}^{n} h(d) G\left(\left\lfloor \frac{n}{d}\right\rfloor\right)\\
@@ -54,17 +54,17 @@ $O(\sqrt{n})$ 找出所有 PN，计算出所有 $h$ 的有效值。对于 $h$ �
 
 下面考虑计算 $h(p^c)$，一共有两种方法：一种是直接推出 $h(p^c)$ 仅与 $p, c$ 有关的计算公式，再根据公式计算 $h(p^c)$；另一种是根据 $f = g * h$ 有 $f(p^c) = \sum_{i=0}^c g(p^i)h(p^{c-i})$，移项可得 $h(p^c) = f(p^c) - \sum_{i=1}^{c}g(p^i)h(p^{c-i})$，现在就可以枚举素数 $p$ 再枚举指数 $c$ 求解出所有 $h(p^c)$。
 
-## PN 筛的一般过程
+### 过程
 
-1. 构造 $g$
-2. 构造快速计算 $G$ 的方法
-3. 计算 $h(p^c)$
-4. 搜索 PN，过程中累加答案
-5. 得到结果
+1.  构造 $g$
+2.  构造快速计算 $G$ 的方法
+3.  计算 $h(p^c)$
+4.  搜索 PN，过程中累加答案
+5.  得到结果
 
 对于第 3 步，可以直接根据公式计算，可以使用枚举法预处理打表，也可以搜索到了再临时推。
 
-## 复杂度分析
+### 性质
 
 以使用第二种方法计算 $h(p^c)$ 为例进行分析。可以分为计算 $h(p^c)$ 和搜索两部分进行分析。
 
@@ -78,13 +78,13 @@ $O(\sqrt{n})$ 找出所有 PN，计算出所有 $h$ 的有效值。对于 $h$ �
 
 ## 例题
 
-### [Luogu P5325【模板】Min_25 筛](https://www.luogu.com.cn/problem/P5325)
+### [Luogu P5325【模板】Min\_25 筛](https://www.luogu.com.cn/problem/P5325)
 
 **题意**：给定积性函数 $f(p^k) = p^k(p^k-1)$，求 $\sum_{i=1}^{n} f(i)$。
 
-易得 $f(p) = p(p-1) = \textit{id}(p)\varphi(p)$，构造 $g(n) = \textit{id}(n)\varphi(n)$。
+易得 $f(p) = p(p-1) = \operatorname{id}(p)\varphi(p)$，构造 $g(n) = \operatorname{id}(n)\varphi(n)$。
 
-考虑使用杜教筛求 $G(n)$，根据 $(\textit{id} * \varphi) * I = id_2$ 可得 $G(n)= \sum_{i=1}^{n} i^2 - \sum_{i=2}^{n} d \cdot G\left(\left\lfloor \dfrac{n}{d} \right\rfloor\right)$。
+考虑使用杜教筛求 $G(n)$，根据 $(\operatorname{id}\cdot \varphi) * \operatorname{id} = \operatorname{id}_2$ 可得 $G(n)= \sum_{i=1}^{n} i^2 - \sum_{d=2}^{n} d \cdot G\left(\left\lfloor \dfrac{n}{d} \right\rfloor\right)$。
 
 之后 $h(p^k)$ 的取值可以枚举计算，这种方法不再赘述。
 
@@ -195,11 +195,11 @@ $S_1$ 可以用杜教筛求，$S_2$ 直接按照公式推，这样 $G$ 也可以
 
 ## 习题
 
-- [PE708 Twos are all you need](https://projecteuler.net/problem=708)
-- [PE639 Summing a multiplicative function](https://projecteuler.net/problem=639)
-- [PE484 Arithmetic Derivative](https://projecteuler.net/problem=484)
+-   [PE708 Twos are all you need](https://projecteuler.net/problem=708)
+-   [PE639 Summing a multiplicative function](https://projecteuler.net/problem=639)
+-   [PE484 Arithmetic Derivative](https://projecteuler.net/problem=484)
 
 ## 参考资料
 
-- [破壁人五号 - Powerful number 筛略解](https://www.cnblogs.com/wallbreaker5th/p/13901487.html)
-- [command_block - 杜教筛（+ 贝尔级数 + powerful number)](https://www.luogu.com.cn/blog/command-block/du-jiao-shai)
+-   [破壁人五号 - Powerful number 筛略解](https://www.cnblogs.com/wallbreaker5th/p/13901487.html)
+-   [command\_block - 杜教筛（+ 贝尔级数 + powerful number）](https://www.luogu.com.cn/blog/command-block/du-jiao-shai)

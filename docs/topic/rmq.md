@@ -2,33 +2,27 @@
 
 RMQ 是英文 Range Maximum/Minimum Query 的缩写，表示区间最大（最小）值。
 
-在笔者接下来的描述中，默认初始数组大小为 $n$。
+在接下来的描述中，默认初始数组大小为 $n$，询问次数为 $m$。
 
-在笔者接下来的描述中，默认时间复杂度标记方式为 $O($ 数据预处理 $) \sim O($ 单次询问 $)$。
+在接下来的描述中，默认时间复杂度标记方式为 $O(A) \sim O(B)$，其中 $O(A)$ 表示预处理时间复杂度，而 $O(B)$ 表示单次询问的时间复杂度。
 
 ## 单调栈
 
 由于 **OI Wiki** 中已有此部分的描述，本文仅给出 [链接](../ds/monotonous-stack.md)。这部分不再展开。
 
-时间复杂度 $O(m\log m) \sim O(\log n)$
-
-空间复杂度 $O(n)$
+时间复杂度 $O(m\log m) \sim O(\log n)$，空间复杂度 $O(n)$。
 
 ## ST 表
 
 由于 **OI Wiki** 中已有此部分的描述，本文仅给出 [链接](../ds/sparse-table.md)。这部分不再展开。
 
-时间复杂度 $O(n\log n) \sim O(1)$
-
-空间复杂度 $O(n\log n)$
+时间复杂度 $O(n\log n) \sim O(1)$，空间复杂度 $O(n\log n)$。
 
 ## 线段树
 
 由于 **OI Wiki** 中已有此部分的描述，本文仅给出 [链接](../ds/seg.md)。这部分不再展开。
 
-时间复杂度 $O(n) \sim O(\log n)$
-
-空间复杂度 $O(n)$
+时间复杂度 $O(n) \sim O(\log n)$，空间复杂度 $O(n)$。
 
 ## Four Russian
 
@@ -46,20 +40,18 @@ Four russian 是一个由四位俄罗斯籍的计算机科学家提出来的基�
 
 在 $S=\log n$ 时候，预处理复杂度达到最优，为 $O((n / \log n)\log n+(n / \log n)\times\log n\times\log \log n)=O(n\log \log n)$。
 
-时间复杂度 $O(n\log \log n) \sim O(1)$
-
-空间复杂度 $O(n\log \log n)$
+时间复杂度 $O(n\log \log n) \sim O(1)$，空间复杂度 $O(n\log \log n)$。
 
 当然询问由于要跑三个 ST 表，该实现方法的常数较大。
 
-!!! note "一些小小的算法改进"
+??? note "一些小小的算法改进"
     我们发现，在询问的两个端点在数组 A 中属于不同的块的时候，数组 A 中块内的询问是关于每一块前缀或者后缀的询问。
     
     显然这些询问可以通过预处理答案在 $O(n)$ 的时间复杂度内被解决。
     
     这样子我们只需要在询问的时候进行至多一次 ST 表上的查询操作了。
 
-!!! note "一些玄学的算法改进"
+??? note "一些玄学的算法改进"
     由于 Four russian 算法以 ST 表为基础，而算法竞赛一般没有非常高的时间复杂度要求，所以 Four russian 算法一般都可以被 ST 表代替，在算法竞赛中并不实用。这里提供一种在算法竞赛中更加实用的 Four russian 改进算法。
     
     我们将块大小设为 $\sqrt n$，然后预处理出每一块内前缀和后缀的 RMQ，再暴力预处理出任意连续的整块之间的 RMQ，时间复杂度为 $O(n)$。
@@ -80,7 +72,7 @@ Four russian 是一个由四位俄罗斯籍的计算机科学家提出来的基�
 
 由于 Four russian 算法的瓶颈在于块内 RMQ 问题，我们重点去讨论块内 RMQ 问题的优化。
 
-由于相邻两个数字的差值为 $\pm 1$，所以在固定左端点数字时 长度不超过 $\log n$ 的右侧序列种类数为 $\sum_{i=1}^{i \leq \log n} 2^{i-1}$，而这个式子显然不超过 $n$。
+由于相邻两个数字的差值为 $\pm 1$，所以在固定左端点数字时 长度不超过 $\log n$ 的右侧序列种类数为 $\sum_{i=1}^{\log n} 2^{i-1}$，而这个式子显然不超过 $n$。
 
 这启示我们可以预处理所有不超过 $n$ 种情况的 最小值 - 第一个元素 的值。
 
@@ -94,7 +86,7 @@ Four russian 是一个由四位俄罗斯籍的计算机科学家提出来的基�
 
 不了解笛卡尔树的朋友请移步 [笛卡尔树](../ds/cartesian-tree.md)。
 
-不难发现，原序列上两个点之间的 min/max，等于笛卡尔树上两个点的 LCA 的权值。根据这一点就可以借助 $O(n) \sim O(1)$ 求解树上两个点之间的 LCA 进而求解 RMQ。$O(n) \sim O(1)$ 树上 LCA 在 [LCA - 标准 RMQ](../graph/lca.md#rmq_1) 已经有描述，这里不再展开。
+不难发现，原序列上两个点之间的 min/max，等于笛卡尔树上两个点的 LCA 的权值。根据这一点就可以借助 $O(n) \sim O(1)$ 求解树上两个点之间的 LCA 进而求解 RMQ。$O(n) \sim O(1)$ 树上 LCA 在 [LCA - 标准 RMQ](../graph/lca.md#标准-rmq) 已经有描述，这里不再展开。
 
 总结一下，笛卡尔树在 RMQ 上的应用，就是通过将普通 RMQ 问题转化为 LCA 问题，进而转化为加减 1 RMQ 问题进行求解，时间复杂度为 $O(n) \sim O(1)$。当然由于转化步数较多，$O(n) \sim O(1)$ RMQ 常数较大。
 
@@ -102,21 +94,19 @@ Four russian 是一个由四位俄罗斯籍的计算机科学家提出来的基�
 
 ### 例题 [Luogu P3865【模板】ST 表](https://www.luogu.com.cn/problem/P3865)
 
-如果数据随机，则我们还可以暴力在笛卡尔树上查找。此时的时间复杂度为期望 $O(n)-O(\log n)$，并且实际使用时这种算法的常数往往很小。
-
 ## 基于状压的线性 RMQ 算法
 
 ### 隐性要求
 
-- 序列的长度 $n$ 满足 $\log_2{n} \leq 64$
+-   序列的长度 $n$ 满足 $\log_2{n} \leq 64$。
 
 ### 前置知识
 
-- [Sparse Table](../ds/sparse-table.md)
+-   [Sparse Table](../ds/sparse-table.md)
 
-- 基本位运算
+-   基本位运算
 
-- 前后缀极值
+-   前后缀极值
 
 ### 算法原理
 
@@ -142,10 +132,12 @@ Four russian 是一个由四位俄罗斯籍的计算机科学家提出来的基�
 
 ??? "参考代码"
     ```cpp
-    #include <bits/stdc++.h>
+    #include <algorithm>
+    #include <cmath>
+    #include <cstdio>
     
-    const int MAXN = 1e5 + 5;
-    const int MAXM = 20;
+    constexpr int MAXN = 1e5 + 5;
+    constexpr int MAXM = 20;
     
     struct RMQ {
       int N, A[MAXN];
@@ -248,4 +240,4 @@ Four russian 是一个由四位俄罗斯籍的计算机科学家提出来的基�
 
 ### 习题
 
-[\[BJOI 2020\]封印](https://loj.ac/problem/3298)：SAM+RMQ
+[\[BJOI 2020\] 封印](https://loj.ac/problem/3298)：SAM+RMQ
