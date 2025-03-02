@@ -2,7 +2,7 @@
 
 基本的位运算共 $6$ 种，分别为按位与、按位或、按位异或、按位取反、左移和右移。
 
-为了方便叙述，下文中省略“按位”。
+为了方便叙述，下文中省略「按位」。
 
 ## 与、或、异或
 
@@ -84,7 +84,7 @@ $$
 
 ## 关于优先级
 
-位运算的优先级低于算术运算符（除了取反），而按位与、按位或及异或低于比较运算符（详见 [运算页面](../lang/op.md) ），所以使用时需多加注意，在必要时添加括号。
+位运算的优先级低于算术运算符（除了取反），而按位与、按位或及异或低于比较运算符（详见 [C++ 运算符优先级总表](../lang/op.md#c-运算符优先级总表)），所以使用时需多加注意，在必要时添加括号。
 
 ## 位运算的应用
 
@@ -92,11 +92,11 @@ $$
 
 1. 高效地进行某些运算，代替其它低效的方式。
 
-2. 表示集合。（常用于 [状压 DP](../dp/state.md) 。）
+2. 表示集合（常用于 [状压 DP](../dp/state.md)）。
 
 3. 题目本来就要求进行位运算。
 
-需要注意的是，用位运算代替其它运算方式（即第一种应用）在很多时候并不能带来太大的优化，反而会使代码变得复杂，使用时需要斟酌。（但像“乘 2 的非负整数次幂”和“除以 2 的非负整数次幂”就最好使用位运算，因为此时使用位运算可以优化复杂度。）
+需要注意的是，用位运算代替其它运算方式（即第一种应用）在很多时候并不能带来太大的优化，反而会使代码变得复杂，使用时需要斟酌。（但像「乘 2 的非负整数次幂」和「除以 2 的非负整数次幂」就最好使用位运算，因为此时使用位运算可以优化复杂度。）
 
 ### 有关 2 的幂的应用
 
@@ -104,116 +104,98 @@ $$
 
 将一个数乘（除） 2 的非负整数次幂：
 
-```cpp
-// C++ Version
-int mulPowerOfTwo(int n, int m) {  // 计算 n*(2^m)
-  return n << m;
-}
-int divPowerOfTwo(int n, int m) {  // 计算 n/(2^m)
-  return n >> m;
-}
-```
+=== "C++"
+    
+    ```cpp
+    int mulPowerOfTwo(int n, int m) {  // 计算 n*(2^m)
+      return n << m;
+    }
+    int divPowerOfTwo(int n, int m) {  // 计算 n/(2^m)
+      return n >> m;
+    }
+    ```
 
-```python
-# Python Version
-def mulPowerOfTwo(n, m): # 计算 n*(2^m)
-    return n << m
-def divPowerOfTwo(n, m): # 计算 n/(2^m)
-    return n >> m
-```
+=== "Python"
+    
+    ```python
+    def mulPowerOfTwo(n, m): # 计算 n*(2^m)
+        return n << m
+    def divPowerOfTwo(n, m): # 计算 n/(2^m)
+        return n >> m
+    ```
 
 !!! warning
     我们平常写的除法是向 $0$ 取整，而这里的右移是向下取整（注意这里的区别），即当数大于等于 $0$ 时两种方法等价，当数小于 $0$ 时会有区别，如： `-1 / 2` 的值为 $0$ ，而 `-1 >> 1` 的值为 $-1$ 。
-
-判断一个数是不是 $2$ 的非负整数次幂：
-
-```cpp
-// C++ Version
-bool isPowerOfTwo(int n) { return n > 0 && (n & (n - 1)) == 0; }
-```
-
-```python
-# Python Version
-def isPowerOfTwo(n):
-    return n > 0 and (n & (n - 1)) == 0
-```
-
-对 $2$ 的非负整数次幂取模：
-
-```cpp
-// C++ Version
-int modPowerOfTwo(int x, int mod) { return x & (mod - 1); }
-```
-
-```python
-# Python Version
-def modPowerOfTwo(x, mod):
-    return x & (mod - 1)
-```
 
 ### 取绝对值
 
 在某些机器上，效率比 `n > 0 ? n : -n` 高。
 
-```cpp
-// C++ Version
-int Abs(int n) {
-  return (n ^ (n >> 31)) - (n >> 31);
-  /* n>>31 取得 n 的符号，若 n 为正数，n>>31 等于 0，若 n 为负数，n>>31 等于 -1
-     若 n 为正数 n^0=n, 数不变，若 n 为负数有 n^(-1)
-     需要计算 n 和 -1 的补码，然后进行异或运算，
-     结果 n 变号并且为 n 的绝对值减 1，再减去 -1 就是绝对值 */
-}
-```
+=== "C++"
+    
+    ```cpp
+    int Abs(int n) {
+      return (n ^ (n >> 31)) - (n >> 31);
+      /* n>>31 取得 n 的符号，若 n 为正数，n>>31 等于 0，若 n 为负数，n>>31 等于 -1
+        若 n 为正数 n^0=n, 数不变，若 n 为负数有 n^(-1)
+        需要计算 n 和 -1 的补码，然后进行异或运算，
+        结果 n 变号并且为 n 的绝对值减 1，再减去 -1 就是绝对值 */
+    }
+    ```
 
-```python
-# Python Version
-def Abs(n):
-    return (n ^ (n >> 31)) - (n >> 31)
-    """
-    n>>31 取得 n 的符号，若 n 为正数，n>>31 等于 0，若 n 为负数，n>>31 等于 -1
-    若 n 为正数 n^0=n, 数不变，若 n 为负数有 n^(-1)
-    需要计算 n 和 -1 的补码，然后进行异或运算，
-    结果 n 变号并且为 n 的绝对值减 1，再减去 -1 就是绝对值
-    """
-
-```
+=== "Python"
+    
+    ```python
+    def Abs(n):
+        return (n ^ (n >> 31)) - (n >> 31)
+        """
+        n>>31 取得 n 的符号，若 n 为正数，n>>31 等于 0，若 n 为负数，n>>31 等于 -1
+        若 n 为正数 n^0=n, 数不变，若 n 为负数有 n^(-1)
+        需要计算 n 和 -1 的补码，然后进行异或运算，
+        结果 n 变号并且为 n 的绝对值减 1，再减去 -1 就是绝对值
+        """
+    
+    ```
 
 ### 取两个数的最大/最小值
 
 在某些机器上，效率比 `a > b ? a : b` 高。
 
-```cpp
-// C++ Version
-// 如果 a>=b,(a-b)>>31 为 0，否则为 -1
-int max(int a, int b) { return b & ((a - b) >> 31) | a & (~(a - b) >> 31); }
-int min(int a, int b) { return a & ((a - b) >> 31) | b & (~(a - b) >> 31); }
-```
+=== "C++"
+    
+    ```cpp
+    // 如果 a >= b, (a - b) >> 31 为 0，否则为 -1
+    int max(int a, int b) { return (b & ((a - b) >> 31)) | (a & (~(a - b) >> 31)); }
+    int min(int a, int b) { return (a & ((a - b) >> 31)) | (b & (~(a - b) >> 31)); }
+    ```
 
-```python
-# Python Version
-# 如果 a>=b,(a-b)>>31 为 0，否则为 -1
-def max(a, b):
-    return b & ((a - b) >> 31) | a & (~(a - b) >> 31)
-def min(a, b):
-    return a & ((a - b) >> 31) | b & (~(a - b) >> 31)
-```
+=== "Python"
+    
+    ```python
+    # 如果 a >= b, (a - b) >> 31 为 0，否则为 -1
+    def max(a, b):
+        return b & ((a - b) >> 31) | a & (~(a - b) >> 31)
+    def min(a, b):
+        return a & ((a - b) >> 31) | b & (~(a - b) >> 31)
+    ```
 
 ### 判断两非零数符号是否相同
 
-```cpp
-// C++ Version
-bool isSameSign(int x, int y) {  // 有 0 的情况例外
-  return (x ^ y) >= 0;
-}
-```
+=== "C++"
+    
+    ```cpp
+    bool isSameSign(int x, int y) {  // 有 0 的情况例外
+      return (x ^ y) >= 0;
+    }
+    ```
 
-```python
-# Python Version
-# 有 0 的情况例外
-def isSameSign(x, y):
-    return (x ^ y) >= 0
-```
+=== "Python"
+    
+    ```python
+    # 有 0 的情况例外
+    def isSameSign(x, y):
+        return (x ^ y) >= 0
+    ```
 
 ### 交换两个数
 
@@ -230,88 +212,73 @@ void swap(int &a, int &b) { a ^= b ^= a ^= b; }
 
 获取一个数二进制的某一位：
 
-```cpp
-// C++ Version
-// 获取 a 的第 b 位，最低位编号为 0
-int getBit(int a, int b) { return (a >> b) & 1; }
-```
+=== "C++"
+    
+    ```cpp
+    // 获取 a 的第 b 位，最低位编号为 0
+    int getBit(int a, int b) { return (a >> b) & 1; }
+    ```
 
-```python
-# Python Version
-# 获取 a 的第 b 位，最低位编号为 0
-def getBit(a, b):
-    return (a >> b) & 1
-```
+=== "Python"
+    
+    ```python
+    # 获取 a 的第 b 位，最低位编号为 0
+    def getBit(a, b):
+        return (a >> b) & 1
+    ```
 
 将一个数二进制的某一位设置为 $0$：
 
-```cpp
-// C++ Version
-// 将 a 的第 b 位设置为 0 ，最低位编号为 0
-int unsetBit(int a, int b) { return a & ~(1 << b); }
-```
+=== "C++"
+    
+    ```cpp
+    // 将 a 的第 b 位设置为 0 ，最低位编号为 0
+    int unsetBit(int a, int b) { return a & ~(1 << b); }
+    ```
 
-```python
-# Python Version
-# 将 a 的第 b 位设置为 0 ，最低位编号为 0
-def unsetBit(a, b):
-    return a & ~(1 << b)
-```
+=== "Python"
+    
+    ```python
+    # 将 a 的第 b 位设置为 0 ，最低位编号为 0
+    def unsetBit(a, b):
+        return a & ~(1 << b)
+    ```
 
 将一个数二进制的某一位设置为 $1$：
 
-```cpp
-// C++ Version
-// 将 a 的第 b 位设置为 1 ，最低位编号为 0
-int setBit(int a, int b) { return a | (1 << b); }
-```
+=== "C++"
+    
+    ```cpp
+    // 将 a 的第 b 位设置为 1 ，最低位编号为 0
+    int setBit(int a, int b) { return a | (1 << b); }
+    ```
 
-```python
-# Python Version
-# 将 a 的第 b 位设置为 1 ，最低位编号为 0
-def setBit(a, b):
-    return a | (1 << b)
-```
+=== "Python"
+    
+    ```python
+    # 将 a 的第 b 位设置为 1 ，最低位编号为 0
+    def setBit(a, b):
+        return a | (1 << b)
+    ```
 
 将一个数二进制的某一位取反：
 
-```cpp
-// C++ Version
-// 将 a 的第 b 位取反 ，最低位编号为 0
-int flapBit(int a, int b) { return a ^ (1 << b); }
-```
+=== "C++"
+    
+    ```cpp
+    // 将 a 的第 b 位取反 ，最低位编号为 0
+    int flapBit(int a, int b) { return a ^ (1 << b); }
+    ```
 
-```python
-# Python Version
-# 将 a 的第 b 位取反 ，最低位编号为 0
-def flapBit(a, b):
-    return a ^ (1 << b)
-```
+=== "Python"
+    
+    ```python
+    # 将 a 的第 b 位取反 ，最低位编号为 0
+    def flapBit(a, b):
+        return a ^ (1 << b)
+    ```
 
 这些操作相当于将一个 $32$ 位整型变量当作一个长度为 $32$ 的布尔数组。
-
-### 模拟集合操作
-
-一个数的二进制表示可以看作是一个集合（$0$ 表示不在集合中，$1$ 表示在集合中）。比如集合 $\{1,3,4,8\}$ ，可以表示成 $(100011010)_2$ 。而对应的位运算也就可以看作是对集合进行的操作。
-
-| 操作   |    集合表示     |         位运算语句          |
-| ------ | :-------------: | :-------------------------: |
-| 交集   |   $a \cap b$    |           `a & b`           |
-| 并集   |   $a \cup b$    |            `a|b`            |
-| 补集   |    $\bar{a}$    | `~a` （全集为二进制都是 1） |
-| 差集   | $a \setminus b$ |         `a & (~b)`          |
-| 对称差 | $a\triangle b$  |           `a ^ b`           |
-
-子集遍历：
-
-```cpp
-// 遍历 u 的非空子集
-for (int s = u; s; s = (s - 1) & u) {
-  // s 是 u 的一个非空子集
-}
-```
-
-用这种方法可以在 $O(2^{\text{popcount}(u)})$ （ $\text{popcount}(u)$ 表示 $u$ 二进制中 1 的个数）的时间复杂度内遍历 $u$ 的子集，进而可以在 $O(3^n)$ 的时间复杂度内遍历大小为 $n$ 的集合的每个子集的子集。（复杂度为 $O(3^n)$ 是因为每个元素都有 不在大子集中/只在大子集中/同时在大小子集中 三种状态。）
 
 ## 汉明权重
 
@@ -372,7 +339,7 @@ x = t | ((((t&-t)/(x&-x))>>1)-1);
 
 - 第一个步骤中，我们把数 $x$ 加上它的 `lowbit`，在二进制表示下，就相当于把 $x$ 最右边的连续一段 $1$ 换成它左边的一个 $1$。如刚才提到的二进制数 $(10110)_2$，它在加上它的 `lowbit` 后是 $(11000)_2$。这其实得到了我们答案的前半部分。
 - 我们接下来要把答案后面的 $1$ 补齐，$t$  的 `lowbit` 是 $x$ 最右边连续一段 $1$ 最左边的 $1$ 移动后的位置，而 $x$ 的 `lowbit` 则是 $x$ 最右边连续一段 $1$ 最左边的位置。还是以 $(10110)_2$ 为例，$t = (11000)_2$，$\operatorname{lowbit}(t) = (01000)_2$，$\operatorname{lowbit}(x)=(00010)_2$。
-- 接下来的除法操作是这种位运算中最难理解的部分，但也是最关键的部分。我们设**原数**最右边连续一段 $1$ 最高位的 $1$ 在第 $r$  位上（位数从 $0$ 开始），最低位的 $1$ 在第 $l$ 位，$t$ 的 `lowbit` 等于 `1 << (r+1)` ，$x$ 的 `lowbit` 等于 `1 << l`， `(((t&-t)/(x&-x))>>1)` 得到的，就是 `(1<<(r+1))/(1<<l)/2 = (1<<r)/(1<<l) = 1<<(r-l)` ，在二进制表示下就是 $1$ 后面跟上 $r-l$ 个零，零的个数正好等于连续 $1$ 的个数减去 $1$ 。举我们刚才的数为例，$\frac{\operatorname{lowbit(t)\div 2}}{\operatorname{lowbit(x)}} = \frac{(00100)_2}{(00010)_2} = (00010)_2$ 。把这个数减去 $1$ 得到的就是我们要补全的低位，或上原来的数就可以得到答案。
+- 接下来的除法操作是这种位运算中最难理解的部分，但也是最关键的部分。我们设**原数**最右边连续一段 $1$ 最高位的 $1$ 在第 $r$  位上（位数从 $0$ 开始），最低位的 $1$ 在第 $l$ 位，$t$ 的 `lowbit` 等于 `1 << (r+1)` ，$x$ 的 `lowbit` 等于 `1 << l`， `(((t&-t)/(x&-x))>>1)` 得到的，就是 `(1<<(r+1))/(1<<l)/2 = (1<<r)/(1<<l) = 1<<(r-l)` ，在二进制表示下就是 $1$ 后面跟上 $r-l$ 个零，零的个数正好等于连续 $1$ 的个数减去 $1$ 。举我们刚才的数为例，$\frac{\operatorname{lowbit(t)/2}}{\operatorname{lowbit(x)}} = \frac{(00100)_2}{(00010)_2} = (00010)_2$ 。把这个数减去 $1$ 得到的就是我们要补全的低位，或上原来的数就可以得到答案。
 
 所以枚举 $0\sim n$ 按汉明权重递增的排列的完整代码为：
 
@@ -420,7 +387,7 @@ GCC 中还有一些用于位运算的内建函数：
 1. 位运算技巧： <https://graphics.stanford.edu/~seander/bithacks.html> 
 2. Other Builtins of GCC： <https://gcc.gnu.org/onlinedocs/gcc/Other-Builtins.html> 
 
-[^note1]: 适用于 C++14 以前的标准。在 C++14 和 C++17 标准中，若原值为带符号类型，且移位后的结果能被原类型的无符号版本容纳，则将该结果 [转换](../lang/var.md#variable-conversion) 为相应的带符号值，否则行为未定义。在 C++20 标准中，规定了无论是带符号数还是无符号数，左移均直接舍弃移出结果类型的位。
+[^note1]: 适用于 C++14 以前的标准。在 C++14 和 C++17 标准中，若原值为带符号类型，且移位后的结果能被原类型的无符号版本容纳，则将该结果 [转换](../lang/var.md#类型转换) 为相应的带符号值，否则行为未定义。在 C++20 标准中，规定了无论是带符号数还是无符号数，左移均直接舍弃移出结果类型的位。
 
 [^note2]: 适用于 C++20 以前的标准。
 

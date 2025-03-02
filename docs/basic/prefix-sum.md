@@ -1,12 +1,14 @@
 ## 前缀和
 
-前缀和是一种重要的预处理，能大大降低查询的时间复杂度。可以简单理解为“数列的前 $n$ 项的和”。[^note1]
+### 定义
+
+前缀和可以简单理解为「数列的前 $n$ 项的和」，是一种重要的预处理方式，能大大降低查询的时间复杂度。[^note1]
 
 C++ 标准库中实现了前缀和函数 [`std::partial_sum`](https://zh.cppreference.com/w/cpp/algorithm/partial_sum)，定义于头文件 `<numeric>` 中。
 
 ### 例题
 
-!!! 例题
+??? 例题
     有 $N$ 个的正整数放到数组 $A$ 里，现在要求一个新的数组 $B$，新数组的第 $i$ 个数 $B[i]$ 是原数组 $A$ 第 $0$ 到第 $i$ 个数的和。
     
     输入：
@@ -26,90 +28,143 @@ C++ 标准库中实现了前缀和函数 [`std::partial_sum`](https://zh.cpprefe
     递推：`B[0] = A[0]`，对于 $i \ge 1$ 则 `B[i] = B[i-1] + A[i]`。
 
 ??? note "参考代码"
-    ```cpp
-    --8<-- "docs/basic/code/prefix-sum/prefix-sum_1.cpp"
-    ```
+    === "C++"
+        ```cpp
+        --8<-- "docs/basic/code/prefix-sum/prefix-sum_1.cpp"
+        ```
+    
+    === "Python"
+        ```python
+        --8<-- "docs/basic/code/prefix-sum/prefix-sum_1.py"
+        ```
 
 ### 二维/多维前缀和
 
-多维前缀和的普通求解方法几乎都是基于容斥原理。
+常见的多维前缀和的求解方法有两种。
 
-???+note "示例：一维前缀和扩展到二维前缀和"
-    比如我们有这样一个矩阵 $a$，可以视为二维数组：
-    
-    ```text
-    1 2 4 3
-    5 1 2 4
-    6 3 5 9
-    ```
-    
-    我们定义一个矩阵 $\textit{sum}$ 使得 $\textit{sum}_{x,y} = \sum\limits_{i=1}^x \sum\limits_{j=1}^y a_{i,j}$，  
-    那么这个矩阵长这样：
-    
-    ```text
-    1  3  7  10
-    6  9  15 22
-    12 18 29 45
-    ```
-    
-    第一个问题就是递推求 $\textit{sum}$ 的过程，$\textit{sum}_{i,j} = \textit{sum}_{i - 1,j} + \textit{sum}_{i,j - 1} - \textit{sum}_{i - 1,j - 1} + a_{i,j}$。
-    
-    因为同时加了 $\textit{sum}_{i - 1,j}$ 和 $\textit{sum}_{i,j - 1}$，故重复了 $\textit{sum}_{i - 1,j - 1}$，减去。
-    
-    第二个问题就是如何应用，譬如求 $(x_1,y_1) - (x_2,y_2)$ 子矩阵的和。
-    
-    那么，根据类似的思考过程，易得答案为 $\textit{sum}_{x_2,y_2} - \textit{sum}_{x_1 - 1,y_2} - sum_{x_2,y_1 - 1} + sum_{x_1 - 1,y_1 - 1}$。
+#### 基于容斥原理
 
-#### 例题
+这种方法多用于二维前缀和的情形。给定大小为 $m\times n$ 的二维数组 $A$，要求出其前缀和 $S$。那么，$S$ 同样是大小为 $m\times n$ 的二维数组，且
 
-???+note "[洛谷 P1387 最大正方形](https://www.luogu.com.cn/problem/P1387)"
+$$
+S_{i,j} = \sum_{i'\le i}\sum_{j'\le j}A_{i',j'}.
+$$
+
+类比一维的情形，$S_{i,j}$ 应该可以基于 $S_{i-1,j}$ 或 $S_{i,j-1}$ 计算，从而避免重复计算前面若干项的和。但是，如果直接将 $S_{i-1,j}$ 和 $S_{i,j-1}$ 相加，再加上 $A_{i,j}$，会导致重复计算 $S_{i-1,j-1}$ 这一重叠部分的前缀和，所以还需要再将这部分减掉。这就是 [容斥原理](../math/combinatorics/inclusion-exclusion-principle.md)。由此得到如下递推关系：
+
+$$
+S_{i,j} = A_{i,j} + S_{i-1,j} + S_{i,j-1} - S_{i-1,j-1}. 
+$$
+
+实现时，直接遍历 $(i,j)$ 求和即可。
+
+???+ note "示例"
+    考虑一个具体的例子。
+
+    ![二位前缀和示例](./images/prefix-sum-2d.svg)
+
+    这里，$S$ 是给定矩阵 $A$ 的前缀和。根据定义，$S_{3,3}$ 是左图中虚线方框中的子矩阵的和。这里，$S_{3,2}$ 是蓝色子矩阵的和，$S_{2,3}$ 是红色子矩阵的和，它们重叠部分的和是 $S_{2,2}$。由此可见，如果直接相加 $S_{3,2}$ 和 $S_{2,3}$，会重复计算 $S_{2,2}$，所以应该有 
+
+    $$
+    S_{3,3} = A_{3,3} + S_{2,3} + S_{3,2} - S_{2,2} = 5 + 18 + 15 - 9 = 29.
+    $$
+
+同样的道理，在已经预处理出二位前缀和后，要查询左上角为 $(i_1,j_1)$、右下角为 $(i_2,j_2)$ 的子矩阵的和，可以计算
+
+$$
+S_{i_2,j_2} - S_{i_1,j_2} - S_{i_2,j_1} + S_{i_1,j_1}.
+$$
+
+这可以在 $O(1)$ 时间内完成。
+
+在二维的情形，以上算法的时间复杂度可以简单认为是 $O(mn)$，即与给定数组的大小成线性关系。但是，当维度 $k$ 增大时，由于容斥原理涉及的项数以指数级的速度增长，时间复杂度会成为 $O(2^kN)$，这里 $k$ 是数组维度，而 $N$ 是给定数组大小。因此，该算法不再适用。
+
+???+ note "[洛谷 P1387 最大正方形](https://www.luogu.com.cn/problem/P1387)"
     在一个 $n\times m$ 的只包含 $0$ 和 $1$ 的矩阵里找出一个不包含 $0$ 的最大正方形，输出边长。
 
 ??? note "参考代码"
+    === "C++"
+        ```cpp
+        --8<-- "docs/basic/code/prefix-sum/prefix-sum_2.cpp"
+        ```
+    
+    === "Python"
+        ```python
+        --8<-- "docs/basic/code/prefix-sum/prefix-sum_2.py"
+        ```
+
+#### 逐维前缀和
+
+对于一般的情形，给定 $k$ 维数组 $A$，大小为 $N$，同样要求得其前缀和 $S$。这里，
+
+$$
+S_{i_1,\cdots,i_k} = \sum_{i'_1\le i_1}\cdots\sum_{i'_k\le i_k} A_{i'_1,\cdots,i'_k}.
+$$
+
+从上式可以看出，$k$ 维前缀和就等于 $k$ 次求和。所以，一个显然的算法是，每次只考虑一个维度，固定所有其它维度，然后求若干个一维前缀和，这样对所有 $k$ 个维度分别求和之后，得到的就是 $k$ 维前缀和。
+
+??? note "三维前缀和的参考实现"
     ```cpp
-    --8<-- "docs/basic/code/prefix-sum/prefix-sum_2.cpp"
+    --8<-- "docs/basic/code/prefix-sum/prefix-sum_4.cpp"
     ```
 
-### 基于 DP 计算高维前缀和
+因为考虑每一个维度的时候，都只遍历了整个数组一遍，这样的算法复杂度是 $O(kN)$ 的，通常可以接受。
 
-基于容斥原理来计算高维前缀和的方法，其优点在于形式较为简单，无需特别记忆，但当维数升高时，其复杂度较高。这里介绍一种基于 [DP](../dp/basic.md) 计算高维前缀和的方法。该方法即通常语境中所称的 **高维前缀和**。
+#### 特例：子集和 DP
 
-设高维空间 $U$ 共有 $D$ 维，需要对 $f[\cdot]$ 求高维前缀和 $\text{sum}[\cdot]$。令 $\text{sum}[i][\text{state}]$ 表示同 $\text{state}$ 后 $D - i$ 维相同的所有点对于 $\text{state}$ 点高维前缀和的贡献。由定义可知 $\text{sum}[0][\text{state}] = f[\text{state}]$，以及 $\text{sum}[\text{state}] = \text{sum}[D][\text{state}]$。
+维度比较大的情形，经常出现在一类叫做 **子集和 (SOS, Sum Over Subsets)** 的问题中。这是高维前缀和的特例。
 
-其递推关系为 $\text{sum}[i][\text{state}] = \text{sum}[i - 1][\text{state}] + \text{sum}[i][\text{state}']$，其中 $\text{state}'$ 为第 $i$ 维恰好比 $\text{state}$ 少 $1$ 的点。该方法的复杂度为 $O(D \times |U|)$，其中 $|U|$ 为高维空间 $U$ 的大小。
+问题描述如下。考虑大小为 $n$ 的集合的全体子集上面定义的函数 $f$，现在要求出其子集和函数 $g$，它满足
 
-一种实现的伪代码如下：
+$$
+g(S) = \sum_{T\subseteq S}f(T).
+$$
 
-    for state
-      sum[state] = f[state];
-    for(i = 0;i <= D;i += 1)
-      for 以字典序从小到大枚举 state
-        sum[state] += sum[state'];
+即 $g(S)$ 等于其所有子集 $T\subseteq S$ 上的函数值 $f(T)$ 的和。
+
+首先，子集和问题可以写成高维前缀和的形式。注意到，子集 $S$ 可以通过状态压缩的思想表示为长度为 $n$ 的 0-1 字符串 $s$。将字符串的每一位都看作是数组下标的一个维度，那么 $f$ 其实就是一个 $n$ 维数组，且每个维度下标都一定在 $\{0,1\}$ 之间。同时，子集的包含关系就等价于下标的大小关系，即
+
+$$
+T\subseteq S \iff \forall i(t_i \le s_i). 
+$$
+
+所以，对子集求和，就是求这个 $n$ 维数组的前缀和。
+
+现在，可以直接使用前文所述的逐维前缀和的方法求得子集和。时间复杂度是 $O(n2^n)$。
+
+??? note "参考实现"
+    ```cpp
+    --8<-- "docs/basic/code/prefix-sum/prefix-sum_5.cpp"
+    ```
+
+子集和的逆操作需要通过 [容斥原理](../math/combinatorics/inclusion-exclusion-principle.md) 进行。子集和问题也是快速莫比乌斯变换的必要步骤之一。
 
 ### 树上前缀和
 
 设 $\textit{sum}_i$ 表示结点 $i$ 到根节点的权值总和。  
 然后：
 
-- 若是点权，$x,y$ 路径上的和为 $\textit{sum}_x + \textit{sum}_y - \textit{sum}_\textit{lca} - \textit{sum}_{\textit{fa}_\textit{lca}}$。
+-   若是点权，$x,y$ 路径上的和为 $\textit{sum}_x + \textit{sum}_y - \textit{sum}_\textit{lca} - \textit{sum}_{\textit{fa}_\textit{lca}}$。
 -   若是边权，$x,y$ 路径上的和为 $\textit{sum}_x + \textit{sum}_y - 2\cdot\textit{sum}_{lca}$。
 
     LCA 的求法参见 [最近公共祖先](../graph/lca.md)。
 
 ## 差分
 
+### 解释
+
 差分是一种和前缀和相对的策略，可以当做是求和的逆运算。
 
 这种策略的定义是令 $b_i=\begin{cases}a_i-a_{i-1}\,&i \in[2,n] \\ a_1\,&i=1\end{cases}$
 
-简单性质：
+### 性质
 
-- $a_i$ 的值是 $b_i$ 的前缀和，即 $a_n=\sum\limits_{i=1}^nb_i$
-- 计算 $a_i$ 的前缀和 $sum=\sum\limits_{i=1}^na_i=\sum\limits_{i=1}^n\sum\limits_{j=1}^{i}b_j=\sum\limits_{i}^n(n-i+1)b_i$
+-   $a_i$ 的值是 $b_i$ 的前缀和，即 $a_n=\sum\limits_{i=1}^nb_i$
+-   计算 $a_i$ 的前缀和 $sum=\sum\limits_{i=1}^na_i=\sum\limits_{i=1}^n\sum\limits_{j=1}^{i}b_j=\sum\limits_{i=1}^n(n-i+1)b_i$
 
 它可以维护多次对序列的一个区间加上一个数，并在最后询问某一位的数或是多次询问某一位的数。注意修改操作一定要在查询操作之前。
 
-???+note "示例"
+???+ note "示例"
     譬如使 $[l,r]$ 中的每个数加上一个 $k$，即
     
     $$
@@ -167,7 +222,7 @@ $$
 
 ### 例题
 
-???+note "[洛谷 3128 最大流](https://www.luogu.com.cn/problem/P3128)"
+???+ note "[洛谷 3128 最大流](https://www.luogu.com.cn/problem/P3128)"
     FJ 给他的牛棚的 $N(2 \le N \le 50,000)$ 个隔间之间安装了 $N-1$ 根管道，隔间编号从 $1$ 到 $N$。所有隔间都被管道连通了。
     
     FJ 有 $K(1 \le K \le 100,000)$ 条运输牛奶的路线，第 $i$ 条路线从隔间 $s_i$ 运输到隔间 $t_i$。一条运输路线会给它的两个端点处的隔间以及中间途径的所有隔间带来一个单位的运输压力，你需要计算压力最大的隔间的压力是多少。
@@ -184,45 +239,48 @@ $$
 
 前缀和：
 
-- [洛谷 U53525 前缀和（例题）](https://www.luogu.com.cn/problem/U53525)
-- [洛谷 U69096 前缀和的逆](https://www.luogu.com.cn/problem/U69096)
-- [AT2412 最大の和](https://vjudge.net/problem/AtCoder-joi2007ho_a#author=wuyudi)
-- [「USACO16JAN」子共七 Subsequences Summing to Sevens](https://www.luogu.com.cn/problem/P3131)
-- [「USACO05JAN」Moo Volume S](https://www.luogu.com.cn/problem/P6067)
+-   [洛谷 B3612【深进 1. 例 1】求区间和](https://www.luogu.com.cn/problem/B3612)
+-   [洛谷 U69096 前缀和的逆](https://www.luogu.com.cn/problem/U69096)
+-   [AtCoder joi2007ho\_a 最大の和](https://atcoder.jp/contests/joi2007ho/tasks/joi2007ho_a)
+-   [「USACO16JAN」子共七 Subsequences Summing to Sevens](https://www.luogu.com.cn/problem/P3131)
+-   [「USACO05JAN」Moo Volume S](https://www.luogu.com.cn/problem/P6067)
 
-* * *
+***
 
 二维/多维前缀和：
 
-- [HDU 6514 Monitor](https://vjudge.net/problem/HDU-6514)
-- [洛谷 P1387 最大正方形](https://www.luogu.com.cn/problem/P1387)
-- [「HNOI2003」激光炸弹](https://www.luogu.com.cn/problem/P2280)
+-   [HDU 6514 Monitor](https://acm.hdu.edu.cn/showproblem.php?pid=6514)
+-   [洛谷 P1387 最大正方形](https://www.luogu.com.cn/problem/P1387)
+-   [「HNOI2003」激光炸弹](https://www.luogu.com.cn/problem/P2280)
+-   [CF 165E Compatible Numbers](https://codeforces.com/contest/165/problem/E)
+-   [CF 383E Vowels](https://codeforces.com/problemset/problem/383/E)
+-   [ARC 100C Or Plus Max](https://atcoder.jp/contests/arc100/tasks/arc100_c)
 
-* * *
+***
 
 树上前缀和：
 
-- [LOJ 10134.Dis](https://loj.ac/problem/10134)
-- [LOJ 2491. 求和](https://loj.ac/problem/2491)
+-   [LOJ 10134.Dis](https://loj.ac/problem/10134)
+-   [LOJ 2491. 求和](https://loj.ac/problem/2491)
 
-* * *
+***
 
 差分：
 
-- [树状数组 3：区间修改，区间查询](https://loj.ac/problem/132)
-- [P3397 地毯](https://www.luogu.com.cn/problem/P3397)
-- [「Poetize6」IncDec Sequence](https://www.luogu.com.cn/problem/P4552)
+-   [树状数组 3：区间修改，区间查询](https://loj.ac/problem/132)
+-   [P3397 地毯](https://www.luogu.com.cn/problem/P3397)
+-   [「Poetize6」IncDec Sequence](https://www.luogu.com.cn/problem/P4552)
 
-* * *
+***
 
 树上差分：
 
-- [洛谷 3128 最大流](https://www.luogu.com.cn/problem/P3128)
-- [JLOI2014 松鼠的新家](https://loj.ac/problem/2236)
-- [NOIP2015 运输计划](http://uoj.ac/problem/150)
-- [NOIP2016 天天爱跑步](http://uoj.ac/problem/261)
+-   [洛谷 3128 最大流](https://www.luogu.com.cn/problem/P3128)
+-   [JLOI2014 松鼠的新家](https://loj.ac/problem/2236)
+-   [NOIP2015 运输计划](http://uoj.ac/problem/150)
+-   [NOIP2016 天天爱跑步](http://uoj.ac/problem/261)
 
-* * *
+***
 
 ## 参考资料与注释
 

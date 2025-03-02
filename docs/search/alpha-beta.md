@@ -2,11 +2,17 @@
 
 ## Minimax 算法
 
-Minimax 算法又叫极小化极大算法，是一种找出失败的最大可能性中的最小值的算法。（维基百科）
+### 定义
+
+Minimax 算法又叫极小化极大算法，是一种找出失败的最大可能性中的最小值的算法。[^ref1]
 
 在局面确定的双人对弈里，常进行对抗搜索，构建一棵每个节点都为一个确定状态的搜索树。奇数层为己方先手，偶数层为对方先手。搜索树上每个叶子节点都会被赋予一个估值，估值越大代表我方赢面越大。我方追求更大的赢面，而对方会设法降低我方的赢面，体现在搜索树上就是，奇数层节点（我方节点）总是会选择赢面最大的子节点状态，而偶数层（对方节点）总是会选择我方赢面最小的的子节点状态。
 
-整个过程，从上到下遍历搜索树，回溯时利用子树信息更新答案，最后得到根节点的值，意义就是我方在双方都采取最优策略下能获得的最大分数。
+### 过程
+
+Minimax 算法的整个过程，会从上到下遍历搜索树，回溯时利用子树信息更新答案，最后得到根节点的值，意义就是我方在双方都采取最优策略下能获得的最大分数。
+
+### 解释
 
 来看一个简单的例子。
 
@@ -29,6 +35,8 @@ Minimax 算法又叫极小化极大算法，是一种找出失败的最大可能
 需要注意的是，对于不同的问题，搜索树每个节点上的值有着不同的含义，它可以是估值、分数、赢的概率等等，为方便起见，我们下面统一用分数来称呼。
 
 ## alpha-beta 剪枝
+
+### 过程
 
 对于如下的局势，假设从左往右搜索：![](images/minimax-4.png)
 
@@ -56,7 +64,7 @@ Minimax 算法又叫极小化极大算法，是一种找出失败的最大可能
 
 ![](images/minimax-9.png)
 
-计算出节点 F 的分数后，节点 F 是节点 E 的一个子节点，故可以更新节点 E 的分数范围。节点 E 是 MAX 节点，更新 $\alpha$，此时 $\alpha \geq \beta$，故可以剪去节点 E 的余下分支。然后，节点 E 是 MAX 节点，将节点 E 的分数设为 $\alpha$，也就是 3。此时，节点 D 的所有子节点搜索完毕，即可计算出节点 D 的分数为 3。
+计算出节点 F 的分数后，节点 F 是节点 E 的一个子节点，故可以更新节点 E 的分数范围。节点 E 是 MAX 节点，更新 $\alpha$，此时 $\alpha \geq \beta$，故可以剪去节点 E 的余下分支。然后，节点 E 是 MAX 节点，将节点 E 的分数设为 $\alpha$，也就是 15。此时，节点 D 的所有子节点搜索完毕，即可计算出节点 D 的分数为 3。
 
 ![](images/minimax-10.png)
 
@@ -68,6 +76,8 @@ Minimax 算法又叫极小化极大算法，是一种找出失败的最大可能
 
 ![](images/minimax-12.png)
 
+### 实现
+
 ???+ note "参考代码"
     ```cpp
     int alpha_beta(int u, int alph, int beta, bool is_max) {
@@ -75,14 +85,14 @@ Minimax 算法又叫极小化极大算法，是一种找出失败的最大可能
       if (is_max) {
         for (int i = 0; i < son_num[u]; ++i) {
           int d = son[u][i];
-          alph = max(alph, alpha_beta(d, alph, beta, is_max ^ 1));
+          alph = max(alph, alpha_beta(d, alph, beta, !is_max));
           if (alph >= beta) break;
         }
         return alph;
       } else {
         for (int i = 0; i < son_num[u]; ++i) {
           int d = son[u][i];
-          beta = min(beta, alpha_beta(d, alph, beta, is_max ^ 1));
+          beta = min(beta, alpha_beta(d, alph, beta, !is_max));
           if (alph >= beta) break;
         }
         return beta;
@@ -90,4 +100,8 @@ Minimax 算法又叫极小化极大算法，是一种找出失败的最大可能
     }
     ```
 
-**本文部分引用自博文 [详解 Minimax 算法与α-β剪枝\_文剑木然](https://blog.csdn.net/wenjianmuran/article/details/90633418)，遵循 CC 4.0 BY-SA 版权协议。**
+## 参考资料与注释
+
+本文部分引用自博文 [详解 Minimax 算法与α-β剪枝\_文剑木然](https://blog.csdn.net/wenjianmuran/article/details/90633418)，遵循 CC 4.0 BY-SA 版权协议。
+
+[^ref1]: [极小化极大算法 - 维基百科，自由的百科全书](https://zh.wikipedia.org/wiki/%E6%9E%81%E5%B0%8F%E5%8C%96%E6%9E%81%E5%A4%A7%E7%AE%97%E6%B3%95)
