@@ -1,27 +1,27 @@
-author: Dev-XYS, ttzytt
+author: Dev-XYS, ttzytt, Sora233, qwqAutomaton
 
-前置知识：[朴素二叉搜索树](https://oi-wiki.org/ds/bst/)
+前置知识：[朴素二叉搜索树](./bst.md)，[堆基础](./heap.md)。
 
 ## 简介
 
-Treap（树堆）是一种 **弱平衡** 的 **二叉搜索树**。它同时符合二叉搜索树和堆的性质，名字也因此为 tree（树）和 heap（堆）的组合。
+Treap（树堆）是一种 **弱平衡** 的 **二叉搜索树**。
 
-其中，二叉搜索树的性质是：
+Treap 的结点除了被维护的 **权值**（$\textit{val}$）之外，还附加了一个随机的 **优先级**（$\textit{priority}$）。其中，权值满足二叉搜索树性质，优先级满足堆性质（小根堆或大根堆）。
 
-- 左子节点的值（$\textit{val}$）比父节点大
-- 右子节点的值（$\textit{val}$）比父节点小（当然这也是可以反过来的）
+其中，二叉搜索树的性质是指：
+
+-   左子节点的权值（$\textit{val}$）比父节点小。
+-   右子节点的权值（$\textit{val}$）比父节点大。
 
 堆的性质是：
 
-- 子节点值（$\textit{priority}$）比父节点大或小（取决于是小根堆还是大根堆）
+-   子节点优先级（$\textit{priority}$）比父节点大或小（取决于是小根堆还是大根堆）。
 
-不难看出，如果用的是同一个值，那这两种数据结构的性质是矛盾的，所以我们再在搜索树的基础上，引入一个给堆的值 $\textit{priority}$。对于 $\textit{val}$ 值，我们维护搜索树的性质，对于 $\textit{priority}$ 值，我们维护堆的性质。其中 $\textit{priority}$ 这个值是随机给出的。
+不难看出，如果用的是同一个值，那么这两种数据结构在组合后会变成一条链，所以我们再在搜索树的基础上，引入一个给堆的值 $\textit{priority}$。对于 $\textit{val}$ 值，我们维护搜索树的性质，对于 $\textit{priority}$ 值，我们维护堆的性质。其中 $\textit{priority}$ 这个值是随机给出的。
 
-下图就是一个 Treap 的例子（这里使用的是小根堆，即根节点的值最小）。
+下图就是一个 Treap 的例子（这里使用的是小根堆，即根节点的优先级最小）。
 
-<div align=center width=70%>
-  <img width=70% src="../images/treap-treap-example.svg" >
-</div>
+![一个 Treap 的例子](./images/treap-treap-example.svg)
 
 那我们为什么需要大费周章的去让这个数据结构符合树和堆的性质，并且随机给出堆的值呢？
 
@@ -29,45 +29,111 @@ Treap（树堆）是一种 **弱平衡** 的 **二叉搜索树**。它同时符�
 
 最后当发现当前节点没有子节点时，就根据新节点的值的大小，让新节点成为当前节点的左或右子节点。
 
-如果新插入的节点的值是随机的，那这个朴素搜索树的形状会非常的“胖”，上图的 Treap 就是一个例子。也就是说，每一层的节点比较多。
+如果插入结点的权值是随机的（换言之，是随机插入的），那这个朴素搜索树的高度较小（接近 $\log n$，其中 $n$ 为结点数），而每一层的节点数较多，即它的形状会非常的「胖」。上图的 Treap 就是一个例子。因此此时的任意操作复杂度都将会是 $O(\log n)$ 左右。
 
-在这样的情况下，这个搜索树的层数是会比较接近 $\log_2{n}$（$n$ 为节点数）的，查询的复杂度也是 $\log_2{n}$（因为只要递归这么多层就能查到）。
+不过，这只是在随机情况下的复杂度，如果我们按照下面这个非常有序的顺序给一个朴素的搜索树插入节点：
 
-不过，这只是在随机情况下的复杂度，如果我们按照下面这个非常有序的顺序给一个朴素的搜索树插入节点。
+```plain
+1 2 3 4 5
+```
 
-    1 2 3 4 5
+那么这棵树将会退化成链，即变得非常「瘦长」（每次插入的节点都比前面的大，所以都被安排到右子节点了）：
 
-那……
+![退化成链的例子](./images/treap-search-tree-chain.svg)
 
-这个树就会变得非常“瘦长”（每次插入的节点都比前面的大，所以都被安排到右子节点了）：
+不难看出，查询的复杂度也从 $O(\log n)$ 变成了 $O(n)$.
 
-<div align=center width=50%>
-  <img width=50% src="../images/treap-search-tree-chain.svg" >
-</div>
+而 treap 为了解决这个问题、达到一个较为「平衡」的状态，通过维护随机的优先级满足堆性质，「打乱」了节点的插入顺序，从而让二叉搜索树达到了理想的复杂度，避免了退化成链的问题。
 
-不难看出，现在这个二叉搜索树已经退化成链了，查询的复杂度也从 $\log_2{n}$ 变成了线性。
+## Treap 复杂度的证明
 
-而 treap 要解决的正是这个问题。它通过随机化的 $\textit{priority}$ 属性，以及维护堆性质的过程，“打乱”了节点的插入顺序。从而让二叉搜索树达到了理想的复杂度，避免了退化成链的问题。
+由于 treap 各种操作的复杂度都和所操作的结点的深度有关，我们首先证明，所有结点的期望高度都是 $O(\log n)$.
 
-笔者并不清楚如何去严格的证明这样随机化的过程可以让搜索树的复杂度的 **期望值** 保持在 $\log_2{n}$，但我们可以试着感性的去理解一下。
+### 记号约定
 
-首先，我们需要认识到一个节点的 $\textit{priority}$ 属性是和它所在的层数有直接关联的。再回忆堆的性质：
+为了方便表述，我们约定：
 
-- 子节点值（$\textit{priority}$）比父节点大或小（取决于是小根堆还是大根堆）
+-   $n$ 是节点个数。
+-   Treap 结点中满足二叉搜索树性质的称为 **权值**，满足堆性质的（也就是随机的）称为 **优先级**。不妨设优先级满足小根堆性质。
+-   $x_k$ 表示权值第 $k$ 小的结点。
+-   $X_{i,j}$ 表示集合 $\{x_i,x_{i+1},\cdots,x_{j-1},x_j\}$，即按权值升序排列后第 $i$ 个到第 $j$ 个的结点构成的集合。
+-   $\operatorname{dep}(x)$ 表示结点 $x$ 的深度。规定根节点的深度是 $0$.
+-   $Y_{i,j}$ 是一个指示器随机变量，当 $x_i$ 是 $x_j$ 的祖先时值为 $1$，否则为 $0$. 特别地，$Y_{i,i}=0$.
+-   $\Pr(A)$ 表示事件 $A$ 发生的概率。
 
-我们发现层数低的节点，比如整个树的根节点，它的 $\textit{priority}$ 属性也会更小（在小根堆中）。并且，在朴素的搜索树中，先被插入的节点，也更有可能会有比较小的层数。我们可以把这个 $\textit{priority}$ 属性和被插入的顺序关联起来理解，这样，也就理解了为什么 treap 可以把节点插入的顺序通过 $\textit{priority}$ 打乱。
+### 树高的证明
 
-在给 treap 插入新节点时，需要同时维护树和堆的性质，为了达到这个目的，有两种方法被发明了出来，分别是旋转和分裂、合并。使用这两种方法的 treap 被分别成为有旋式 treap 和 无旋式 treap。
+由于结点 $x_i$ 的深度等于它祖先的个数，因此有
+
+$$
+\operatorname{dep}(x_i)=\sum_{k=1}^nY_{k,i}
+$$
+
+那么根据期望的线性性，有
+
+$$
+E(\operatorname{dep}(x_i))=E\left(\sum_{k=1}^nY_{k,i}\right)=\sum_{k=1}^nE(Y_{k,i})
+$$
+
+由于 $Y_{k,i}$ 是指示器随机变量，它的期望就等于它为 $1$ 的概率，因此
+
+$$
+E(\operatorname{dep}(x_i))=\sum_{k=1}^n\Pr(Y_{k,i}=1)
+$$
+
+我们先证明引理：$Y_{i,j}=1$ 当且仅当 $x_i$ 的优先级是 $X_{i,j}$ 中最小的。
+
+??? note "引理的证明"
+    **证明**：考虑分类讨论 $x_i$ 和 $x_j$ 的情况。
+    
+    1.  若 $x_i$ 是根节点：由于优先级满足小根堆性质，$x_i$ 的优先级最小，并且对于任意的 $x_j$，$x_i$ 都是 $x_j$ 的祖先。
+    2.  若 $x_j$ 是根节点：同理，$x_j$ 优先级最小，因此 $x_i$ 不是 $X_{i,j}$ 中优先级最小的；同时 $x_i$ 也不是 $x_j$ 的祖先。
+    3.  若 $x_i$ 和 $x_j$ 在根节点的两个子树中（一左一右），那么根节点 $r\in X_{i,j}$. 因此 $x_i$ 的优先级不可能是 $X_{i,j}$ 中最小的（因为根节点的比它小）。同时，由于 $x_i$ 和 $x_j$ 分属两个子树，$x_i$ 也不是 $x_j$ 的祖先。
+    4.  若 $x_i$ 和 $x_j$ 在根节点的同一个子树中，此时可以将这个子树单独拿出来作为一棵新的 treap，递归进行上面的证明即可。$\square$
+
+那么根据引理，深度的期望可以转化成
+
+$$
+E(\operatorname{dep}(x_i))=\sum_{k=1}^n\Pr(x_k=\min X_{i,k}\land k\neq i)
+$$
+
+又因为结点的优先级是随机的，我们假定集合 $X_{i,j}$ 中任何一个结点的优先级最小的概率都相同，那么
+
+$$
+\begin{aligned}
+E(\operatorname{dep}(x_i))&=\sum_{k=1}^n\Pr(x_k=\min X_{i,k}\land k\neq i)\\
+&=\sum_{k=1}^{n}\Pr(x_k=\min X_{i,k})-1\\
+&=\sum_{k=1}^n\dfrac{1}{|i-k|+1}-1\\
+&=\sum_{k=1}^{i-1}\dfrac{1}{i-k+1}+\sum_{k=i+1}^n\dfrac{1}{k-i+1}\\
+&=\sum_{j=2}^i\dfrac 1j+\sum_{j=2}^{n-i+1}\dfrac 1j\\
+&\le 2\sum_{j=2}^n\dfrac 1j < 2\sum_{j=2}^n\int_{j-1}^j\dfrac 1x\mathrm dx\\
+&=2\int_1^n\dfrac 1x\mathrm dx=2\ln n=O(\log n)
+\end{aligned}
+$$
+
+因此每个结点的期望高度都是 $O(\log n)$.
+
+而朴素的二叉搜索树的操作的复杂度均是 $O(h)$，同时 treap 维护堆性质的复杂度也是 $O(h)$ 的，因此 treap 各种操作的期望复杂度都是 $O(\log n)$.
+
+???+ note "期望复杂度的感性理解"
+    首先，我们需要认识到一个节点的 $\textit{priority}$ 属性是和它所在的层数有直接关联的。再回忆堆的性质：
+    
+    -   子节点值（$\textit{priority}$）比父节点大或小（取决于是小根堆还是大根堆）
+    
+    我们发现层数低的节点，比如整个树的根节点，它的 $\textit{priority}$ 属性也会更小（在小根堆中）。并且，在朴素的搜索树中，先被插入的节点，也更有可能会有比较小的层数。我们可以把这个 $\textit{priority}$ 属性和被插入的顺序关联起来理解，这样，也就理解了为什么 treap 可以把节点插入的顺序通过 $\textit{priority}$ 打乱。
+
+给 treap 插入新节点时，需要同时维护树和堆的性质。其中，搜索树的性质可以在插入时维护，而堆性质的维护则有两种处理方法，分别是旋转和分裂、合并。使用这两种方法的 treap 被分别称为 **旋转 treap** 和 **无旋 treap**。
 
 ## 旋转 treap
 
 **旋转 treap** 维护平衡的方式为旋转，和 AVL 树的旋转操作类似，分为 **左旋** 和 **右旋**。即在满足二叉搜索树的条件下根据堆的优先级对 treap 进行平衡操作。
 
-旋转 treap 在做普通平衡树题的时候，是所有平衡树中常数较小的。因为普通的二叉搜索树会被递增或递减的数据卡，用 treap 对每个节点定义一个由 `rand` 得到的权值，从而防止特殊数据卡。同时在每次删除/插入时通过这个权值决定要不要旋转即可，其他操作与二叉搜索树类似。
+旋转 treap 在做普通平衡树题的时候，是所有平衡树中常数较小的。
 
-大部分的树形数据结构都有指针和数组模拟两种实现方法，下面将会详细的分部分讲解指针版的代码，如果想要学习数组实现，可以拉到最下面的完整代码部分。
-???+info
-    注意本代码中的 `rank` 代表前面讲的 $\textit{priority}$ 变量（堆的值）。并且，维护的堆的性质是小根堆（$\textit{priority}$ 小的在上面）。本代码来源。[^ref1]
+下面的讲解中的代码用指针实现了旋转 treap，文末附有数组形式的完整实现。
+
+???+ info
+    代码中的 `rank` 代表前面讲的优先级（$\textit{priority}$ 属性），该属性满足的是小根堆性质。
 
 ### 节点结构
 
@@ -76,7 +142,7 @@ struct Node {
   Node *ch[2];  // 两个子节点的地址
   int val, rank;
   int rep_cnt;  // 当前这个值（val）重复出现的次数
-  int siz;      //
+  int siz;      // 以当前节点为根的子树大小
 
   Node(int val) : val(val), rep_cnt(1), siz(1) {
     ch[0] = ch[1] = nullptr;
@@ -101,12 +167,12 @@ struct Node {
 
 旋转操作的含义：
 
-- 在不影响搜索树性质的前提下，把和旋转方向相反的子树变成根节点（如左旋，就是把右子树变成根节点）
-- 不影响性质，并且在旋转过后，跟旋转方向相同的子节点变成了原来的根节点（如左旋，旋转完之后的左子节点是旋转前的根节点）
+-   在不影响搜索树性质的前提下，把和旋转方向相反的子树变成根节点（如左旋，就是把右子树变成根节点）
+-   不影响性质，并且在旋转过后，跟旋转方向相同的子节点变成了原来的根节点（如左旋，旋转完之后的左子节点是旋转前的根节点）
 
 左旋和右旋操作是相互的，如下图。
 
-![](../images/treap-rotate.svg)
+![旋转操作](./images/treap-rotate.svg)
 
 ```cpp
 enum rot_type { LF = 1, RT = 0 };
@@ -131,14 +197,14 @@ void _rotate(Node *&cur,
    */
   cur->ch[dir] = tmp->ch[!dir];    // 让 A 的右子节点变成 D
   tmp->ch[!dir] = cur;             // 让 C 的左子节点变成 A
-  tmp->upd_siz(), cur->upd_siz();  // 更新大小信息
+  cur->upd_siz(), tmp->upd_siz();  // 更新大小信息
   cur = tmp;  // 最后把临时储存 C 树的变量赋值到当前根节点上（注意 cur 是引用）
 }
 ```
 
 ### 插入
 
-跟普通搜索树插入的过程没啥区别，但是需要在插的过程中通过旋转来维护树堆中堆的性质。
+类似普通二叉搜索树的插入，但是需要在插入的过程中通过旋转来维护优先级的堆性质。
 
 ```cpp
 void _insert(Node *&cur, int val) {
@@ -219,7 +285,7 @@ void _del(Node *&cur, int val) {
             cur->ch[!dir],
             val);  // 旋转完成后原来的根节点就在旋方向那边，所以需要
                    // 继续把这个原来的根节点删掉
-                   // 如果说要删的这个节点是在整个树的“上层的”，那我们会一直通过这
+                   // 如果说要删的这个节点是在整个树的「上层的」，那我们会一直通过这
                    // 这里的旋转操作，把它转到没有子树了（或者只有一个），再删掉它。
         cur->upd_siz();
         // 删除会造成大小改变
@@ -248,8 +314,8 @@ int _query_rank(Node *cur, int val) {
   } else {
     if (cur->ch[1] != nullptr)
       // 如果要查的值比这个节点大，那这个节点的左子树以及这个节点自身肯定都比要查的值小
-      // 所以要加上这两个值，再加上往右边找的结果（以右子树为根的子树中，val
-      // 这个值的大小的排名）
+      // 所以要加上这两个值，再加上往右边找的结果
+      // （以右子树为根的子树中，val 这个值的大小的排名）
       return less_siz + cur->rep_cnt + _query_rank(cur->ch[1], val);
     else
       return cur->siz + 1;
@@ -264,9 +330,9 @@ int _query_rank(Node *cur, int val) {
 
 以下是一个判断方法的表：
 
-| 左子树            | 根节点/当前节点                                 | 右子树       |
-| -------------- | ---------------------------------------- | --------- |
-| 排名一定小于等于左子树的大小 | 排名应该 >= 左子树的大小，并且&lt;= 左子树的大小 + 根节点的重复次数 | 不然的话就在右子树 |
+| 左子树         | 根节点/当前节点                           | 右子树                    |
+| ----------- | ---------------------------------- | ---------------------- |
+| 排名 ≤ 左子树的大小 | 排名 > 左子树的大小，并且 ≤ 左子树的大小 + 根节点的重复次数 | 排名 > 左子树的大小 + 根节点的重复次数 |
 
 注意如果在右子树，递归的时候需要对原来的 `rank` 进行处理。递归的时候就相当去查，在右子树中为这个排名的值，为了把排名转换成基于右子树的，需要把原来的 `rank` 减去左子树的大小和根节点的重复次数。
 
@@ -305,7 +371,7 @@ int _query_val(Node *cur, int rank) {
 ```cpp
 int _query_prev(Node *cur, int val) {
   if (val <= cur->val) {
-    // 还是比 val 大，所以往右子树找
+    // 还是比 val 大，所以往左子树找
     if (cur->ch[0] != nullptr) return _query_prev(cur->ch[0], val);
   } else {
     // 只有能进到这个 else 里，才会更新 q_prev_tmp 的值
@@ -317,7 +383,7 @@ int _query_prev(Node *cur, int val) {
     // cur->val
     return q_prev_tmp;
   }
-  return -1145;
+  return NIL;
 }
 ```
 
@@ -334,7 +400,7 @@ int _query_nex(Node *cur, int val) {
     if (cur->ch[0] != nullptr) _query_nex(cur->ch[0], val);
     return q_nex_tmp;
   }
-  return -1145;
+  return NIL;
 }
 ```
 
@@ -345,7 +411,7 @@ int _query_nex(Node *cur, int val) {
 **无旋 treap** 又称分裂合并 treap。它仅有两种核心操作，即为 **分裂** 与 **合并**。通过这两种操作，在很多情况下可以比旋转 treap 更方便的实现别的操作。下面逐一介绍这两种操作。
 
 ???+ note "注释"
-    讲解无旋 treap 应当提到 **FHQ-Treap**(by 范浩强）。即可持久化，支持区间操作的无旋 Treap。更多内容请参照《范浩强谈数据结构》ppt。
+    讲解无旋 treap 应当提到 **FHQ-Treap**（by 范浩强）。即可持久化，支持区间操作的无旋 Treap。更多内容请参照《范浩强谈数据结构》ppt。
 
 ### 分裂（split）
 
@@ -353,13 +419,13 @@ int _query_nex(Node *cur, int val) {
 
 分裂过程接受两个参数：根指针 $\textit{cur}$、关键值 $\textit{key}$。结果为将根指针指向的 treap 分裂为两个 treap，第一个 treap 所有结点的值（$\textit{val}$）小于等于 $\textit{key}$，第二个 treap 所有结点的值大于 $\textit{key}$。
 
-该过程首先判断 $\textit{key}$ 是否小于 $\textit{cur}$ 的值，若小于，则说明 $\textit{cur}$ 及其右子树全部小于 $\textit{key}（$\\textit{cur}$可能等于），$ 属于第二个 treap。当然，也可能有一部分的左子树的值大于 $\textit{key}$，所以还需要继续向左子树递归地分裂。对于大于 $\textit{key}$ 的那部分左子树，我们把它作为 $\textit{cur}$ 的左子树，这样，整个 $\textit{cur}$ 上的节点都是大于 $\textit{key}$ 的。
+该过程首先判断 $\textit{key}$ 是否小于 $\textit{cur}$ 的值，若小于，则说明 $\textit{cur}$ 及其右子树全部大于 $\textit{key}$，属于第二个 treap。当然，也可能有一部分的左子树的值大于 $\textit{key}$，所以还需要继续向左子树递归地分裂。对于大于 $\textit{key}$ 的那部分左子树，我们把它作为 $\textit{cur}$ 的左子树，这样，整个 $\textit{cur}$ 上的节点都是大于 $\textit{key}$ 的。
 
 相应的，如果 $\textit{key}$ 大于等于 $\textit{cur}$ 的值，说明 $\textit{cur}$ 的整个左子树以及其自身都小于 $\textit{key}$，属于分裂后的第一个 treap。并且，$\textit{cur}$ 的部分右子树也可能有部分小于 $\textit{key}$，因此我们需要继续递归地分裂右子树。把小于 $\textit{key}$ 的那部分作为 $\textit{cur}$ 的右子树，这样，整个 $\textit{cur}$ 上的节点都小于 $\textit{key}$。
 
-下图展示了 $\textit{cur}$ 的值小于等于 $\textit{key}$ 时按值分裂的情况。[^ref2]
+下图展示了 $\textit{cur}$ 的值小于等于 $\textit{key}$ 时按值分裂的情况。[^ref1]
 
-![](../images/treap-none-rot-split-by-val.svg)
+![按值分裂](./images/treap-none-rot-split-by-val.svg)
 
 ```cpp
 pair<Node *, Node *> split(Node *cur, int key) {
@@ -397,33 +463,32 @@ pair<Node *, Node *> split(Node *cur, int key) {
 并且，此操作的递归部分和按值分裂也非常相似，这里不赘述。
 
 ```cpp
-#define _3 second.second
-#define _2 second.first
-
-pair<Node *, pair<Node *, Node *>> split_by_rk(Node *cur, int rk) {
-  if (cur == nullptr) return {nullptr, {nullptr, nullptr}};
+tuple<Node *, Node *, Node *> split_by_rk(Node *cur, int rk) {
+  if (cur == nullptr) return {nullptr, nullptr, nullptr};
   int ls_siz = cur->ch[0] == nullptr ? 0 : cur->ch[0]->siz;
   if (rk <= ls_siz) {
     // 排名和 cur 相等的节点在左子树
-    auto temp = split_by_rk(cur->ch[0], rk);
-    cur->ch[0] = temp._3;  // 返回的第三个 treap 中的排名都大于 rk
-    // cur 的左子树被设成 temp._3 后，整个 cur 中节点的排名都大于 rk
+    Node *l, *mid, *r;
+    tie(l, mid, r) = split_by_rk(cur->ch[0], rk);
+    cur->ch[0] = r;  // 返回的第三个 treap 中的排名都大于 rk
+    // cur 的左子树被设成 r 后，整个 cur 中节点的排名都大于 rk
     cur->upd_siz();
-    return {temp.first, {temp._2, cur}};
+    return {l, mid, cur};
   } else if (rk <= ls_siz + cur->cnt) {
     // 和 cur 相等的就是当前节点
     Node *lt = cur->ch[0];
     Node *rt = cur->ch[1];
     cur->ch[0] = cur->ch[1] = nullptr;
     // 分裂后第二个 treap 只有一个节点，所有要把它的子树设置为空
-    return {lt, {cur, rt}};
+    return {lt, cur, rt};
   } else {
     // 排名和 cur 相等的节点在右子树
     // 递归过程同上
-    auto temp = split_by_rk(cur->ch[1], rk - ls_siz - cur->cnt);
-    cur->ch[1] = temp.first;
+    Node *l, *mid, *r;
+    tie(l, mid, r) = split_by_rk(cur->ch[1], rk - ls_siz - cur->cnt);
+    cur->ch[1] = l;
     cur->upd_siz();
-    return {cur, {temp._2, temp._3}};
+    return {cur, mid, r};
   }
 }
 ```
@@ -434,7 +499,7 @@ pair<Node *, pair<Node *, Node *>> split_by_rk(Node *cur, int rk) {
 
 在旋转 treap 中，我们借助旋转操作来维护 $\textit{priority}$ 符合堆的性质，同时旋转时还不能改变树的性质。在无旋 treap 中，我们用合并达到相同的效果。
 
-因为两个 treap 已经有序，所以我们在合并的时候只需要考虑把哪个树“放在上面”，把哪个“放在下面”，也就是是需要判断将哪个一个树作为子树。显然，根据堆的性质，我们需要把 $\textit{priority}$ 小的放在上面（这里采用小根堆）。
+因为两个 treap 已经有序，所以我们在合并的时候只需要考虑把哪个树「放在上面」，把哪个「放在下面」，也就是是需要判断将哪个一个树作为子树。显然，根据堆的性质，我们需要把 $\textit{priority}$ 小的放在上面（这里采用小根堆）。
 
 同时，我们还需要满足搜索树的性质，所以若 $\textit{u}$ 的根结点的 $\textit{priority}$ 小于 $\textit{v}$ 的，那么 $\textit{u}$ 即为新根结点，并且 $\textit{v}$ 因为值比 $\textit{u}$ 更大，应与 $\textit{u}$ 的右子树合并；反之，则 $\textit{v}$ 作为新根结点，然后因为 $u$ 的值比 $\textit{v}$ 小，与 $v$ 的左子树合并。
 
@@ -466,15 +531,17 @@ Node *merge(Node *u, Node *v) {
 
 ### 插入
 
-在无旋 treap 中，插入，删除，根据值查询排名等基础操作既可以用普通二叉查找树的方法实现，也可以用分裂和合并来实现。通常来说，使用分裂和合并来实现更加简洁，但是速度会慢一点[^ref3]。为了帮助更好的理解无旋 treap，下面的操作全部使用分裂和合并实现。
+在无旋 treap 中，插入，删除，根据值查询排名等基础操作既可以用普通二叉查找树的方法实现，也可以用分裂和合并来实现。通常来说，使用分裂和合并来实现更加简洁，但是速度会慢一点[^ref2]。为了帮助更好的理解无旋 treap，下面的操作全部使用分裂和合并实现。
 
 在实现插入操作时，我们利用了分裂操作的一些性质。也就是值小于等于 $\textit{val}$ 的节点会被分到第一个 treap。
 
 所以，假设我们根据 $\textit{val}$ 分裂当前这个 treap。会有下面两棵树，并符合以下条件：
 
 $$
-T_1 \le val\\
-T_2 > val
+\begin{aligned}
+T_1 &\le val\\
+T_2 &> val
+\end{aligned}
 $$
 
 其中 $T_1$ 表示分裂后所有被分到第一个 treap 的节点的集合，$T_2$ 则是第二个。
@@ -482,8 +549,10 @@ $$
 如果我们再按照 $\textit{val} - 1$ 继续分裂 $T_1$，那么会产生下面两棵树，并符合以下条件：
 
 $$
+\begin{gathered}
 T_{1\ \text{left}} \le val - 1\\
 T_{1\ \text{right}} > val - 1 \ \And \ T_{1\ \text{right}} \le val
+\end{gathered}
 $$
 
 其中 $T_{1\ \text{left}}$ 表示 $T_1$ 分裂后所有被分到第一个 treap 的节点的集合，$T_{1\ \text{right}}$ 则是第二个。并且上面的式子中，后半部分的 $\And \ T_{1\ \text{right}} \le val$ 来自于 $T_1$ 所符合的条件 $T_1 \le val$。
@@ -492,7 +561,7 @@ $$
 
 在插入时，如果我们发现符合 $T_{1\ \text{right}}$ 的节点存在，那就可以直接增加重复次数，否则，就新开一个节点。
 
-注意把树分裂好了还需要用合并操作把它“粘”回去，这样下次还能继续使用。并且，还需要注意合并操作的参数顺序是有要求的，第一个树的所有节点的值都需要小于第二个。
+注意把树分裂好了还需要用合并操作把它「粘」回去，这样下次还能继续使用。并且，还需要注意合并操作的参数顺序是有要求的，第一个树的所有节点的值都需要小于第二个。
 
 ```cpp
 void insert(int val) {
@@ -567,9 +636,10 @@ int qrank_by_val(Node* cur, int val) {
 
 ```cpp
 int qval_by_rank(Node *cur, int rk) {
-  auto temp = split_by_rk(cur, rk);
-  int ret = temp._2->val;
-  root = merge(temp.first, merge(temp._2, temp._3));
+  Node *l, *mid, *r;
+  tie(l, mid, r) = split_by_rk(cur, rk);
+  int ret = mid->val;
+  root = merge(merge(l, mid), r);
   return ret;
 }
 ```
@@ -591,7 +661,7 @@ int qprev(int val) {
 
 ### 查询第一个比 val 大的节点
 
-和上个操作类似，可以把这个问题转化为，在比 $\textit{val}$ 大的所有节点中，找出排名最大的。那么根据 $\textit{val}$ 分裂后，返回的第二个 treap 中的所有节点的值就大于 $\textit{val}$。
+和上个操作类似，可以把这个问题转化为，在比 $\textit{val}$ 大的所有节点中，找出排名最小的。那么根据 $\textit{val}$ 分裂后，返回的第二个 treap 中的所有节点的值就大于 $\textit{val}$。
 
 然后我们去查询这个树中排名为 $1$ 的节点（也就是值最小的节点）的值，就可以成功查到第一个比 $\textit{val}$ 大的节点。
 
@@ -628,27 +698,27 @@ int qnex(int val) {
 > 您需要写一种数据结构（可参考题目标题），来维护一个有序数列。
 >
 > 其中需要提供以下操作：翻转一个区间，例如原有序序列是 $5\ 4\ 3\ 2\ 1$，翻转区间是 $[2,4]$ 的话，结果是 $5\ 2\ 3\ 4\ 1$。
-> 对于 $100\%$ 的数据，$1 \le n$（初始区间长度）$m$（翻转次数）$\le 1e5$
+> 对于 $100\%$ 的数据，$1 \le n$（初始区间长度）$m$（翻转次数）$\le 10^5$
 
 在这道题目中，我们需要实现的是区间翻转，那么我们首先需要考虑如何建树，建出来的树需要是初始的区间。
 
-我们只需要把区间的下标依次插入 treap 中，这样在中序遍历（先遍历左子树，然后当前节点，最后右子树）时，就可以得到这个区间[^ref4]。
+我们只需要把区间的下标依次插入 treap 中，这样在中序遍历（先遍历左子树，然后当前节点，最后右子树）时，就可以得到这个区间[^ref3]。
 
 我们知道在朴素的二叉查找树中按照递增的顺序插入节点，建出来的树是一个长链，按照中序遍历，自然可以得到这个区间。
 
-<div align=center width=50%>
-  <img width=50% src="../images/treap-search-tree-chain.svg" >
+<div align=center>
+  <img style="width: 50%; " src="../images/treap-search-tree-chain.svg" >
 </div>
 
 如上图，按照 $1\ 2\ 3\ 4\ 5$ 的顺序给朴素搜索树插入节点，中序遍历时，得到的也是 $1\ 2\ 3\ 4\ 5$。
 
 但是在 treap 中，按增序插入节点后，在合并操作时还会根据 $\textit{priority}$ 调整树的结构，在这样的情况下，如何确保中序遍历一定能正确的输出呢？
 
-可以参考 [笛卡尔树的单调栈建树方法](https://oi-wiki.org/ds/cartesian-tree/) 来理解这个问题。
+可以参考 [笛卡尔树的单调栈建树方法](./cartesian-tree.md) 来理解这个问题。
 
 设新插入的节点为 $\textit{u}$。
 
-首先，因为时递增的插入节点，每一个新插入的节点肯定会被连接到 treap 的右链（即从根结点一直往右子树走，经过的结点形成的链）上。
+首先，因为是递增地插入节点，每一个新插入的节点肯定会被连接到 treap 的右链（即从根结点一直往右子树走，经过的结点形成的链）上。
 
 从根节点开始，右链上的节点的 $\textit{priority}$ 是递增的（小根堆）。那我们可以找到右链上第一个 $\textit{priority}$ 大于 $\textit{u}$ 的节点，我们叫这个节点 $\textit{v}$，并把这个节点换成 $\textit{u}$。
 
@@ -658,17 +728,17 @@ int qnex(int val) {
 
 下图是一个 treap 根据递增顺序插入 $1 \sim 5$ 号节点时，插入 $5$ 号节点时的变化，可以用这张图更好的理解按照增序插入的过程。
 
-![](../images/treap-none-rot-seg-build.svg)
+![插入结点](./images/treap-none-rot-seg-build.svg)
 
 #### 区间翻转
 
-翻转 $[l, r]$ 这个区间时，基本思路是将树分裂成 $[1, l - 1],\ [l, r],\ [r + 1, n]$ 三个区间，再对中间的 $[l, r]$ 进行翻转[^ref4]。
+翻转 $[l, r]$ 这个区间时，基本思路是将树分裂成 $[1, l - 1],\ [l, r],\ [r + 1, n]$ 三个区间，再对中间的 $[l, r]$ 进行翻转[^ref3]。
 
 翻转的具体操作是把区间内的子树的每一个左，右子节点交换位置。如下图就展示了翻转上图中 treap 的 $[3, 4]$ 和 $[3, 5]$ 区间后的 treap。
 
-![](../images/treap-none-rot-seg-flip-ex.svg)
+![区间翻转](./images/treap-none-rot-seg-flip-ex.svg)
 
-注意如果按照这个方法翻转，那么每次翻转 $[l, r]$ 区间时，就会有 $r - l$ 个节点会被交换位置，这样频繁的操作显然不能满足 $1e5$ 的数据范围，其 $\operatorname{O}(n \times \log_2 n)$ 的单次翻转复杂度甚至不如暴力（因为我们除了需要花线性时间交换节点外，还需要在树中花费 $\operatorname{O}(\log_2 n)$ 的时间找到需要交换的节点。
+注意如果按照这个方法翻转，那么每次翻转 $[l, r]$ 区间时，就会有 $r - l$ 个节点会被交换位置，这样频繁的操作显然不能满足 $10^5$ 的数据范围，其 $O(n \times \log_2 n)$ 的单次翻转复杂度甚至不如暴力（因为我们除了需要花线性时间交换节点外，还需要在树中花费 $O(\log_2 n)$ 的时间找到需要交换的节点）。
 
 再观察题目要求，可以发现因为只需要最后输出操作完的区间，所以并不需要每次都真的去交换。如此一来，便可以使用线段树中常用的懒标记（lazy tag）来优化复杂度。交换时，只需要在父节点打上标记，代表这个子树下的每个左右子节点都需要交换就行了。
 
@@ -676,11 +746,11 @@ int qnex(int val) {
 
 在无旋 treap 中也是一样。具体操作时我们会把 treap 分裂成前文讲到的三个树，然后给中间的树打上懒标记后合并这三棵树。因为我们想要翻转的区间和懒标记代表的区间不一定重合，所以要在分裂时下传标记。并且，分裂和合并操作会造成每个节点及其懒标记所代表的节点发生变动，所以也需要在合并前下传懒标记。
 
-换句话说，是当树的结构发生改变的时候，当我们进行分裂或合并操作时需要改变某一个点的左右儿子信息时之前，应该下放标记，而非之后，因为懒标记是需要下传给儿子节点的，但更改左右儿子信息之后若懒标记还未下放，则懒标记就丢失了下放的对象。[^ref5]
+换句话说，是当树的结构发生改变的时候，当我们进行分裂或合并操作时需要改变某一个点的左右儿子信息时之前，应该下放标记，而非之后，因为懒标记是需要下传给儿子节点的，但更改左右儿子信息之后若懒标记还未下放，则懒标记就丢失了下放的对象。[^ref4]
 
 <!-- TODO: 可以加一张图解释为什么需要在分裂和合并时下传标记 -->
 
-以下为代码讲解，代码参考了[^ref4]。
+以下为代码讲解，代码参考了[^ref3]。
 
 因为区间操作中大部分操作都和普通的无旋 treap 相同，所以这里只讲解和普通无旋 treap 不同的地方。
 
@@ -690,14 +760,14 @@ int qnex(int val) {
 
 ```cpp
 // 这里这个 pushdown 是 Node 类的成员函数，其中 to_rev 是懒标记
-inline void pushdown() {
+void pushdown() {
   swap(ch[0], ch[1]);
   if (ch[0] != nullptr) ch[0]->to_rev ^= 1;
   if (ch[1] != nullptr) ch[1]->to_rev ^= 1;
   to_rev = false;
 }
 
-inline void check_tag() {
+void check_tag() {
   if (to_rev) pushdown();
 }
 ```
@@ -724,9 +794,10 @@ pair<Node*, Node*> split(Node* cur, int sz) {
     cur->upd_siz();
     return {temp.first, cur};
   } else {
-    auto temp = split(cur->ch[1],
-                      sz - siz(cur->ch[0]) -
-                          1);  // 这里的转换在有旋 treap 的 “根据排名查询值有讲”
+    auto temp =
+        split(cur->ch[1],
+              sz - siz(cur->ch[0]) -
+                  1);  // 这里的转换在有旋 treap 的 「根据排名查询值有讲」
     cur->ch[1] = temp.first;
     cur->upd_siz();
     return {cur, temp.second};
@@ -799,7 +870,9 @@ void print(Node* cur) {
     
     ```cpp
     // author: (ttzytt)[ttzytt.com]
-    #include <bits/stdc++.h>
+    #include <cstdint>
+    #include <cstdio>
+    #include <cstdlib>
     using namespace std;
     
     struct Node {
@@ -824,6 +897,8 @@ void print(Node* cur) {
      private:
       Node *root;
     
+      constexpr static int NIL = -1;  // 用于表示查询的值不存在
+    
       enum rot_type { LF = 1, RT = 0 };
     
       int q_prev_tmp = 0, q_nex_tmp = 0;
@@ -832,7 +907,7 @@ void print(Node* cur) {
         Node *tmp = cur->ch[dir];
         cur->ch[dir] = tmp->ch[!dir];
         tmp->ch[!dir] = cur;
-        tmp->upd_siz(), cur->upd_siz();
+        cur->upd_siz(), tmp->upd_siz();
         cur = tmp;
       }
     
@@ -933,7 +1008,7 @@ void print(Node* cur) {
           if (cur->ch[1] != nullptr) _query_prev(cur->ch[1], val);
           return q_prev_tmp;
         }
-        return -1145;
+        return NIL;
       }
     
       int _query_nex(Node *cur, int val) {
@@ -944,7 +1019,7 @@ void print(Node* cur) {
           if (cur->ch[0] != nullptr) _query_nex(cur->ch[0], val);
           return q_nex_tmp;
         }
-        return -1145;
+        return NIL;
       }
     
      public:
@@ -1014,7 +1089,10 @@ void print(Node* cur) {
     ```cpp
     
     // author: (ttzytt)[ttzytt.com]
-    #include <bits/stdc++.h>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <ctime>
+    #include <tuple>
     using namespace std;
     
     struct Node {
@@ -1032,7 +1110,7 @@ void print(Node* cur) {
         val = _node->val, prio = _node->prio, cnt = _node->cnt, siz = _node->siz;
       }
     
-      inline void upd_siz() {
+      void upd_siz() {
         siz = cnt;
         if (ch[0] != nullptr) siz += ch[0]->siz;
         if (ch[1] != nullptr) siz += ch[1]->siz;
@@ -1059,24 +1137,26 @@ void print(Node* cur) {
         }
       }
     
-      pair<Node *, pair<Node *, Node *>> split_by_rk(Node *cur, int rk) {
-        if (cur == nullptr) return {nullptr, {nullptr, nullptr}};
+      tuple<Node *, Node *, Node *> split_by_rk(Node *cur, int rk) {
+        if (cur == nullptr) return {nullptr, nullptr, nullptr};
         int ls_siz = cur->ch[0] == nullptr ? 0 : cur->ch[0]->siz;
         if (rk <= ls_siz) {
-          auto temp = split_by_rk(cur->ch[0], rk);
-          cur->ch[0] = temp._3;
+          Node *l, *mid, *r;
+          tie(l, mid, r) = split_by_rk(cur->ch[0], rk);
+          cur->ch[0] = r;
           cur->upd_siz();
-          return {temp.first, {temp._2, cur}};
+          return {l, mid, cur};
         } else if (rk <= ls_siz + cur->cnt) {
           Node *lt = cur->ch[0];
           Node *rt = cur->ch[1];
           cur->ch[0] = cur->ch[1] = nullptr;
-          return {lt, {cur, rt}};
+          return {lt, cur, rt};
         } else {
-          auto temp = split_by_rk(cur->ch[1], rk - ls_siz - cur->cnt);
-          cur->ch[1] = temp.first;
+          Node *l, *mid, *r;
+          tie(l, mid, r) = split_by_rk(cur->ch[1], rk - ls_siz - cur->cnt);
+          cur->ch[1] = l;
           cur->upd_siz();
-          return {cur, {temp._2, temp._3}};
+          return {cur, mid, r};
         }
       }
     
@@ -1135,9 +1215,10 @@ void print(Node* cur) {
       }
     
       int qval_by_rank(Node *cur, int rk) {
-        auto temp = split_by_rk(cur, rk);
-        int ret = temp._2->val;
-        root = merge(temp.first, merge(temp._2, temp._3));
+        Node *l, *mid, *r;
+        tie(l, mid, r) = split_by_rk(cur, rk);
+        int ret = mid->val;
+        root = merge(merge(l, mid), r);
         return ret;
       }
     
@@ -1150,6 +1231,7 @@ void print(Node* cur) {
     
       int qnex(int val) {
         auto temp = split(root, val);
+        int ret = qval_by_rank(temp.second, 1);
         root = merge(temp.first, temp.second);
         return ret;
       }
@@ -1158,7 +1240,7 @@ void print(Node* cur) {
     none_rot_treap tr;
     
     int main() {
-      srand(time(0));
+      srand(time(nullptr));
       int t;
       scanf("%d", &t);
       while (t--) {
@@ -1199,7 +1281,9 @@ void print(Node* cur) {
     ```cpp
     
     // author: (ttzytt)[ttzytt.com]
-    #include <bits/stdc++.h>
+    #include <cstdlib>
+    #include <ctime>
+    #include <iostream>
     using namespace std;
     
     // 参考：https://www.cnblogs.com/Equinox-Flower/p/10785292.html
@@ -1215,14 +1299,14 @@ void print(Node* cur) {
         prio = rand();
       }
     
-      inline int upd_siz() {
+      int upd_siz() {
         siz = cnt;
         if (ch[0] != nullptr) siz += ch[0]->siz;
         if (ch[1] != nullptr) siz += ch[1]->siz;
         return siz;
       }
     
-      inline void pushdown() {
+      void pushdown() {
         swap(ch[0], ch[1]);
         if (ch[0] != nullptr) ch[0]->to_rev ^= 1;
         // 如果原来子节点也要翻转，那两次翻转就抵消了，如果子节点不翻转，那这个
@@ -1231,7 +1315,7 @@ void print(Node* cur) {
         to_rev = false;
       }
     
-      inline void check_tag() {
+      void check_tag() {
         if (to_rev) pushdown();
       }
     };
@@ -1309,7 +1393,7 @@ void print(Node* cur) {
     Seg_treap tr;
     
     int main() {
-      srand(time(0));
+      srand(time(nullptr));
       int n, m;
       cin >> n >> m;
       for (int i = 1; i <= n; i++) tr.insert(i);
@@ -1336,12 +1420,10 @@ void print(Node* cur) {
 
 ## 参考资料与注释
 
-[^ref1]: <https://ttzytt.com/2022/06/treap_note/>
+[^ref1]: 本图的设计参考了 [维基百科 treap 词条的配图](https://en.wikipedia.org/wiki/Treap)
 
-[^ref2]: 本图的设计参考了 [维基百科 treap 词条的配图](https://en.wikipedia.org/wiki/Treap)
+[^ref2]: <https://charleswu.site/archives/1051>
 
-[^ref3]: <https://charleswu.site/archives/1051>
+[^ref3]: <https://www.cnblogs.com/Equinox-Flower/p/10785292.html>
 
-[^ref4]: <https://www.cnblogs.com/Equinox-Flower/p/10785292.html>
-
-[^ref5]: <https://www.luogu.com.cn/blog/85514/fhq-treap-xue-xi-bi-ji>
+[^ref4]: <https://www.luogu.com.cn/blog/85514/fhq-treap-xue-xi-bi-ji>

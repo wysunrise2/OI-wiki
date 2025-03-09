@@ -1,29 +1,30 @@
-#include <bits/stdc++.h>
+#include <cstring>
+#include <iostream>
 using namespace std;
 
 template <class T>
-inline bool checkMax(T &a, const T b) {
-  return a < b ? a = b, 1 : 0;
+bool checkMax(T &a, const T b) {
+  return a < b ? a = b, true : false;
 }
 
-const int N = 8, M = 8;
-const int offset = 3, mask = (1 << offset) - 1;
+constexpr int N = 8, M = 8;
+constexpr int offset = 3, mask = (1 << offset) - 1;
 int A[N + 1][M + 1];
 int n, m;
 int ans, d;
-const int MaxSZ = 16796, Prime = 9973;
+constexpr int MaxSZ = 16796, Prime = 9973;
 
 struct hashTable {
   int head[Prime], next[MaxSZ], sz;
   int state[MaxSZ];
   int key[MaxSZ];
 
-  inline void clear() {
+  void clear() {
     sz = 0;
     memset(head, -1, sizeof(head));
   }
 
-  inline void push(int s) {
+  void push(int s) {
     int x = s % Prime;
     for (int i = head[x]; ~i; i = next[i]) {
       if (state[i] == s) {
