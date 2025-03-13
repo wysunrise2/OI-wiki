@@ -1,8 +1,9 @@
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <iostream>
 
 using namespace std;
 
-const int MAX_VAL_RANGE = 280010;
+constexpr int MAX_VAL_RANGE = 280010;
 
 int n, m, log2Values[MAX_VAL_RANGE + 1];
 
@@ -14,7 +15,7 @@ struct Edge {
 int cnt, head[140010];
 
 void addedge(int u, int v, int val = 0) {
-  e[++cnt] = (Edge){v, head[u], val};
+  e[++cnt] = Edge{v, head[u], val};
   head[u] = cnt;
 }
 
@@ -105,7 +106,7 @@ void kruskal() {  // 最小生成树
 int ans;
 int A, B, C, P;
 
-inline int rnd() { return A = (A * B + C) % P; }
+int rnd() { return A = (A * B + C) % P; }
 
 void initLog2() {
   for (int i = 2; i <= MAX_VAL_RANGE; i++) {
@@ -119,7 +120,7 @@ int main() {
   for (int i = 1; i <= m; i++) {
     int u, v, val;
     cin >> u >> v >> val;
-    GR::e[i] = (GR::Edge){u, v, val};
+    GR::e[i] = GR::Edge{u, v, val};
   }
   GR::kruskal();
   TR::LCA::init();

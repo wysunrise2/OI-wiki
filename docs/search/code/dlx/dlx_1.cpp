@@ -1,28 +1,19 @@
-#include <bits/stdc++.h>
-const int N = 500 + 10;
-int n, m, idx, ans;
-int first[N], siz[N], stk[N];
-
-struct DLXNODE {
-  int lc, rc, up, dn, r, c;
-};
-
-inline int read() {  // 快读
-  register int x = 0, f = 0, ch;
-  while (!isdigit(ch = getchar())) f |= ch == '-';
-  while (isdigit(ch)) x = (x << 1) + (x << 3) + (ch ^ 48), ch = getchar();
-  return f ? -x : x;
-}
+#include <cctype>
+#include <cstring>
+#include <iostream>
+constexpr int N = 500 + 10;
+int n, m, ans;
+int stk[N];
 
 struct DLX {
-  static const int MAXSIZE = 1e5 + 10;
+  static constexpr int MAXSIZE = 1e5 + 10;
   int n, m, tot, first[MAXSIZE + 10], siz[MAXSIZE + 10];
   int L[MAXSIZE + 10], R[MAXSIZE + 10], U[MAXSIZE + 10], D[MAXSIZE + 10];
   int col[MAXSIZE + 10], row[MAXSIZE + 10];
 
   void build(const int &r, const int &c) {  // 进行build操作
     n = r, m = c;
-    for (register int i = 0; i <= c; ++i) {
+    for (int i = 0; i <= c; ++i) {
       L[i] = i - 1, R[i] = i + 1;
       U[i] = D[i] = i;
     }
@@ -43,7 +34,7 @@ struct DLX {
   }
 
   void remove(const int &c) {  // 进行remove操作
-    register int i, j;
+    int i, j;
     L[R[c]] = L[c], R[L[c]] = R[c];
     for (i = D[c]; i != c; i = D[i])
       for (j = R[i]; j != i; j = R[j])
@@ -51,7 +42,7 @@ struct DLX {
   }
 
   void recover(const int &c) {  // 进行recover操作
-    register int i, j;
+    int i, j;
     for (i = U[c]; i != c; i = U[i])
       for (j = L[i]; j != i; j = L[j]) U[D[j]] = D[U[j]] = j, ++siz[col[j]];
     L[R[c]] = R[L[c]] = c;
@@ -60,35 +51,40 @@ struct DLX {
   bool dance(int dep) {  // dance
     if (!R[0]) {
       ans = dep;
-      return 1;
+      return true;
     }
-    register int i, j, c = R[0];
+    int i, j, c = R[0];
     for (i = R[0]; i != 0; i = R[i])
       if (siz[i] < siz[c]) c = i;
     remove(c);
     for (i = D[c]; i != c; i = D[i]) {
       stk[dep] = row[i];
       for (j = R[i]; j != i; j = R[j]) remove(col[j]);
-      if (dance(dep + 1)) return 1;
+      if (dance(dep + 1)) return true;
       for (j = L[i]; j != i; j = L[j]) recover(col[j]);
     }
     recover(c);
-    return 0;
+    return false;
   }
 } solver;
 
+using std::cin;
+using std::cout;
+
 int main() {
-  n = read(), m = read();
+  cin.tie(nullptr)->sync_with_stdio(false);
+  cin >> n >> m;
   solver.build(n, m);
-  for (register int i = 1; i <= n; ++i)
-    for (register int j = 1; j <= m; ++j) {
-      int x = read();
+  for (int i = 1; i <= n; ++i)
+    for (int j = 1; j <= m; ++j) {
+      int x;
+      cin >> x;
       if (x) solver.insert(i, j);
     }
   solver.dance(1);
   if (ans)
-    for (register int i = 1; i < ans; ++i) printf("%d ", stk[i]);
+    for (int i = 1; i < ans; ++i) cout << stk[i] << ' ';
   else
-    puts("No Solution!");
+    cout << "No Solution!\n";
   return 0;
 }

@@ -1,119 +1,105 @@
-// 仔细推一下就是和三维偏序差不多的式子了，基本就是一个三维偏序的板子
 #include <algorithm>
-#include <cstdio>
-using namespace std;
-typedef long long ll;
-int n;
-int m;
+#include <iostream>
 
-struct treearray {
-  int ta[200010];
+constexpr int MAXN = 1e5 + 10;
+constexpr int MAXK = 2e5 + 10;
 
-  inline void ub(int& x) { x += x & (-x); }
+int n, k;
 
-  inline void db(int& x) { x -= x & (-x); }
+struct Element {
+  int a, b, c;
+  int cnt;
+  int res;
 
-  inline void c(int x, int t) {
-    for (; x <= n + 1; ub(x)) ta[x] += t;
+  bool operator!=(Element other) const {
+    if (a != other.a) return true;
+    if (b != other.b) return true;
+    if (c != other.c) return true;
+    return false;
   }
+};
 
-  inline int sum(int x) {
-    int r = 0;
-    for (; x > 0; db(x)) r += ta[x];
-    return r;
-  }
-} ta;
+Element e[MAXN];
+Element ue[MAXN];
+int m, t;
+int res[MAXN];
 
-struct data {
-  int val;
-  int del;
-  int ans;
-} a[100010];
+struct BinaryIndexedTree {
+  int node[MAXK];
 
-int rv[100010];
-ll res;
+  int lowbit(int x) { return x & -x; }
 
-bool cmp1(const data& a, const data& b) {
-  return a.val < b.val;
-}  // 重写两个比较
-
-bool cmp2(const data& a, const data& b) { return a.del < b.del; }
-
-void solve(int l, int r) {  // 底下是具体的式子，套用
-  if (r - l == 1) {
+  void Add(int pos, int val) {
+    while (pos <= k) {
+      node[pos] += val;
+      pos += lowbit(pos);
+    }
     return;
   }
+
+  int Ask(int pos) {
+    int res = 0;
+    while (pos) {
+      res += node[pos];
+      pos -= lowbit(pos);
+    }
+    return res;
+  }
+} BIT;
+
+bool cmpA(Element x, Element y) {
+  if (x.a != y.a) return x.a < y.a;
+  if (x.b != y.b) return x.b < y.b;
+  return x.c < y.c;
+}
+
+bool cmpB(Element x, Element y) {
+  if (x.b != y.b) return x.b < y.b;
+  return x.c < y.c;
+}
+
+void CDQ(int l, int r) {
+  if (l == r) return;
   int mid = (l + r) / 2;
-  solve(l, mid);
-  solve(mid, r);
-  int i = l + 1;
+  CDQ(l, mid);
+  CDQ(mid + 1, r);
+  std::sort(ue + l, ue + mid + 1, cmpB);
+  std::sort(ue + mid + 1, ue + r + 1, cmpB);
+  int i = l;
   int j = mid + 1;
-  while (i <= mid) {
-    while (a[i].val > a[j].val && j <= r) {
-      ta.c(a[j].del, 1);
-      j++;
+  while (j <= r) {
+    while (i <= mid && ue[i].b <= ue[j].b) {
+      BIT.Add(ue[i].c, ue[i].cnt);
+      i++;
     }
-    a[i].ans += ta.sum(m + 1) - ta.sum(a[i].del);
-    i++;
+    ue[j].res += BIT.Ask(ue[j].c);
+    j++;
   }
-  i = l + 1;
-  j = mid + 1;
-  while (i <= mid) {
-    while (a[i].val > a[j].val && j <= r) {
-      ta.c(a[j].del, -1);
-      j++;
-    }
-    i++;
-  }
-  i = mid;
-  j = r;
-  while (j > mid) {
-    while (a[j].val < a[i].val && i > l) {
-      ta.c(a[i].del, 1);
-      i--;
-    }
-    a[j].ans += ta.sum(m + 1) - ta.sum(a[j].del);
-    j--;
-  }
-  i = mid;
-  j = r;
-  while (j > mid) {
-    while (a[j].val < a[i].val && i > l) {
-      ta.c(a[i].del, -1);
-      i--;
-    }
-    j--;
-  }
-  sort(a + l + 1, a + r + 1, cmp1);
+  for (int k = l; k < i; k++) BIT.Add(ue[k].c, -ue[k].cnt);
   return;
 }
 
+using std::cin;
+using std::cout;
+
 int main() {
-  scanf("%d%d", &n, &m);
+  cin.tie(nullptr)->sync_with_stdio(false);
+  cin >> n >> k;
+  for (int i = 1; i <= n; i++) cin >> e[i].a >> e[i].b >> e[i].c;
+  std::sort(e + 1, e + n + 1, cmpA);
   for (int i = 1; i <= n; i++) {
-    scanf("%d", &a[i].val);
-    rv[a[i].val] = i;
+    t++;
+    if (e[i] != e[i + 1]) {
+      m++;
+      ue[m].a = e[i].a;
+      ue[m].b = e[i].b;
+      ue[m].c = e[i].c;
+      ue[m].cnt = t;
+      t = 0;
+    }
   }
-  for (int i = 1; i <= m; i++) {
-    int p;
-    scanf("%d", &p);
-    a[rv[p]].del = i;
-  }
-  for (int i = 1; i <= n; i++) {
-    if (a[i].del == 0) a[i].del = m + 1;
-  }
-  for (int i = 1; i <= n; i++) {
-    res += ta.sum(n + 1) - ta.sum(a[i].val);
-    ta.c(a[i].val, 1);
-  }
-  for (int i = 1; i <= n; i++) {
-    ta.c(a[i].val, -1);
-  }
-  solve(0, n);
-  sort(a + 1, a + n + 1, cmp2);
-  for (int i = 1; i <= m; i++) {
-    printf("%lld\n", res);
-    res -= a[i].ans;
-  }
+  CDQ(1, m);
+  for (int i = 1; i <= m; i++) res[ue[i].res + ue[i].cnt - 1] += ue[i].cnt;
+  for (int i = 0; i < n; i++) cout << res[i] << '\n';
   return 0;
 }

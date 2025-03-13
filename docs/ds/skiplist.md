@@ -186,7 +186,11 @@ bool erase(const K &key) {
 
 ??? note "参考代码"
     ```cpp
-    #include <bits/stdc++.h>
+    #include <cassert>
+    #include <climits>
+    #include <ctime>
+    #include <iostream>
+    #include <map>
     using namespace std;
     
     template <typename K, typename V>
@@ -213,18 +217,18 @@ bool erase(const K &key) {
     
     template <typename K, typename V>
     struct SkipList {
-      static const int MAXL = 32;
-      static const int P = 4;
-      static const int S = 0xFFFF;
-      static const int PS = S / P;
-      static const int INVALID = INT_MAX;
+      static constexpr int MAXL = 32;
+      static constexpr int P = 4;
+      static constexpr int S = 0xFFFF;
+      static constexpr int PS = S / P;
+      static constexpr int INVALID = INT_MAX;
     
       SkipListNode<K, V> *head, *tail;
       int length;
       int level;
     
       SkipList() {
-        srand(time(0));
+        srand(time(nullptr));
     
         level = length = 0;
         tail = new SkipListNode<K, V>(INVALID, 0, 0);
@@ -239,7 +243,7 @@ bool erase(const K &key) {
       int randomLevel() {
         int lv = 1;
         while ((rand() & S) < PS) ++lv;
-        return min(MAXL, lv);
+        return MAXL > lv ? lv : MAXL;
       }
     
       void insert(const K &key, const V &value) {
@@ -368,7 +372,6 @@ bool erase(const K &key) {
 
 ## 参考资料
 
-1.  [Skip Lists: A Probabilistic Alternative to
-    Balanced Trees](https://15721.courses.cs.cmu.edu/spring2018/papers/08-oltpindexes1/pugh-skiplists-cacm1990.pdf)
-2. [Skip List](https://en.wikipedia.org/wiki/Skip_list)
-3. [A Skip List Cookbook](http://cglab.ca/~morin/teaching/5408/refs/p90b.pdf)
+1.  [Skip Lists: A Probabilistic Alternative to Balanced Trees](https://15721.courses.cs.cmu.edu/spring2018/papers/08-oltpindexes1/pugh-skiplists-cacm1990.pdf)
+2.  [Skip List](https://en.wikipedia.org/wiki/Skip_list)
+3.  [A Skip List Cookbook](http://cglab.ca/~morin/teaching/5408/refs/p90b.pdf)

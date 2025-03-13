@@ -1,9 +1,9 @@
-#include <bits/stdc++.h>
+#include <iostream>
 using namespace std;
-const int _ = 5e5 + 10;
+constexpr int _ = 5e5 + 10;
 
 namespace trie {
-const int _n = _ * 25;
+constexpr int _n = _ * 25;
 int rt[_];
 int ch[_n][2];
 int w[_n];  //`w[o]` 指节点 `o` 到其父亲节点这条边上数值的数量（权值）。
@@ -22,7 +22,7 @@ void maintain(int o) {  // 维护w数组和xorv（权值的异或）数组
   }
 }
 
-inline int mknode() {  // 创造一个新的节点
+int mknode() {  // 创造一个新的节点
   ++tot;
   ch[tot][0] = ch[tot][1] = 0;
   w[tot] = 0;
@@ -80,9 +80,8 @@ void dfs0(int o, int f) {  // 得到fa数组
 
 int V[_];
 
-inline int get(int x) {
-  return (fa[x] == -1 ? 0 : lztar[fa[x]]) + V[x];
-}  // 权值函数
+// 权值函数
+int get(int x) { return (fa[x] == -1 ? 0 : lztar[fa[x]]) + V[x]; }
 
 int main() {
   cin >> n >> m;
@@ -119,7 +118,7 @@ int main() {
       int res = 0;
       res = trie::xorv[trie::rt[x]];
       res ^= get(fa[x]);
-      printf("%d\n", res);
+      cout << res << '\n';
     }
   }
   return 0;

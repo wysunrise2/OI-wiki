@@ -1,24 +1,25 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <map>
 using namespace std;
 
-const int MOD = 1e9 + 7;
+constexpr int MOD = 1e9 + 7;
 
 template <typename T>
-inline int mint(T x) {
+int mint(T x) {
   x %= MOD;
   if (x < 0) x += MOD;
   return x;
 }
 
-inline int add(int x, int y) { return x + y >= MOD ? x + y - MOD : x + y; }
+int add(int x, int y) { return x + y >= MOD ? x + y - MOD : x + y; }
 
-inline int mul(int x, int y) { return (long long)1 * x * y % MOD; }
+int mul(int x, int y) { return (long long)1 * x * y % MOD; }
 
-inline int sub(int x, int y) {
-  return x < y ? x - y + MOD : x - y;
-}  // 防止负数
+int sub(int x, int y) {
+  return x < y ? x - y + MOD : x - y;  // 防止负数
+}
 
-inline int qp(int x, int y) {
+int qp(int x, int y) {
   int r = 1;
   for (; y; y >>= 1) {
     if (y & 1) r = mul(r, x);
@@ -27,11 +28,11 @@ inline int qp(int x, int y) {
   return r;
 }
 
-inline int inv(int x) { return qp(x, MOD - 2); }
+int inv(int x) { return qp(x, MOD - 2); }
 
 namespace PNS {
-const int N = 2e6 + 5;
-const int M = 35;
+constexpr int N = 2e6 + 5;
+constexpr int M = 35;
 
 long long global_n;
 
@@ -107,7 +108,7 @@ int G(long long n) {
 void dfs(long long d, int hd, int pid) {
   ans = add(ans, mul(hd, G(global_n / d)));
 
-  for (int i = pid, p; i <= pcnt; ++i) {
+  for (int i = pid; i <= pcnt; ++i) {
     if (i > 1 && d > global_n / prime[i] / prime[i]) break;  // 剪枝
 
     int c = 2;
@@ -143,7 +144,7 @@ int solve(long long n) {
 int main() {
   PNS::init();
   long long n;
-  scanf("%lld", &n);
-  printf("%d\n", PNS::solve(n));
+  cin >> n;
+  cout << PNS::solve(n) << '\n';
   return 0;
 }

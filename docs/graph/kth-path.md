@@ -2,9 +2,9 @@
 
 给定一个有 $n$ 个结点，$m$ 条边的有向图，求从 $s$ 到 $t$ 的所有不同路径中的第 $k$ 短路径的长度。
 
-## A\*算法
+## A \* 算法
 
-A\*算法定义了一个对当前状态 $x$ 的估价函数 $f(x)=g(x)+h(x)$，其中 $g(x)$ 为从初始状态到达当前状态的实际代价，$h(x)$ 为从当前状态到达目标状态的最佳路径的估计代价。每次取出 $f(x)$ 最优的状态 $x$，扩展其所有子状态，可以用 **优先队列** 来维护这个值。
+A \* 算法定义了一个对当前状态 $x$ 的估价函数 $f(x)=g(x)+h(x)$，其中 $g(x)$ 为从初始状态到达当前状态的实际代价，$h(x)$ 为从当前状态到达目标状态的最佳路径的估计代价。每次取出 $f(x)$ 最优的状态 $x$，扩展其所有子状态，可以用 **优先队列** 来维护这个值。
 
 在求解 $k$ 短路问题时，令 $h(x)$ 为从当前结点到达终点 $t$ 的最短路径长度。可以通过在反向图上对结点 $t$ 跑单源最短路预处理出对每个结点的这个值。
 
@@ -16,7 +16,7 @@ A\*算法定义了一个对当前状态 $x$ 的估价函数 $f(x)=g(x)+h(x)$，�
 
 当图的形态是一个 $n$ 元环的时候，该算法最坏是 $O(nk\log n)$ 的。但是这种算法可以在相同的复杂度内求出从起始点 $s$ 到每个结点的前 $k$ 短路。
 
-### 参考实现
+### 实现
 
 ```cpp
 #include <algorithm>
@@ -24,13 +24,13 @@ A\*算法定义了一个对当前状态 $x$ 的估价函数 $f(x)=g(x)+h(x)$，�
 #include <cstring>
 #include <queue>
 using namespace std;
-const int maxn = 5010;
-const int maxm = 400010;
-const int inf = 2e9;
-int n, m, s, t, k, u, v, ww, H[maxn], cnt[maxn];
-int cur, h[maxn], nxt[maxm], p[maxm], w[maxm];
-int cur1, h1[maxn], nxt1[maxm], p1[maxm], w1[maxm];
-bool tf[maxn];
+constexpr int MAXN = 5010;
+constexpr int MAXM = 400010;
+constexpr int inf = 2e9;
+int n, m, s, t, k, u, v, ww, H[MAXN], cnt[MAXN];
+int cur, h[MAXN], nxt[MAXM], p[MAXM], w[MAXM];
+int cur1, h1[MAXN], nxt1[MAXM], p1[MAXM], w1[MAXM];
+bool tf[MAXN];
 
 void add_edge(int x, int y, double z) {
   cur++;
@@ -100,21 +100,25 @@ int main() {
 
 ## 可持久化可并堆优化 k 短路算法
 
-### 最短路树与任意路径的关系与性质
+### 最短路树与任意路径
+
+#### 定义
 
 在反向图上从 $t$ 开始跑最短路，设在原图上结点 $x$ 到 $t$ 的最短路长度为 $dist_x$，建出 **任意** 一棵以 $t$ 为根的最短路树 $T$。
 
 所谓最短路径树，就是满足从树上的每个结点 $x$ 到根节点 $t$ 的简单路径都是 $x$ 到 $t$ 的 **其中** 一条最短路径。
 
+#### 性质
+
 设一条从 $s$ 到 $t$ 的路径经过的边集为 $P$，去掉 $P$ 中与 $T$ 的交集得到 $P'$。
 
 $P'$ 有如下性质：
 
-1. 对于一条不在 $T$ 上的边 $e$，其为从 $u$ 到 $v$ 的一条边，边权为 $w$，定义其代价 $\Delta e=dist_v+w-dist_u$，即为选择该边后路径长度的增加量。则路径 $P$ 的长度 $L_P=dist_s+\sum_{e\in P'} \Delta e$。
+1.  对于一条不在 $T$ 上的边 $e$，其为从 $u$ 到 $v$ 的一条边，边权为 $w$，定义其代价 $\Delta e=dist_v+w-dist_u$，即为选择该边后路径长度的增加量。则路径 $P$ 的长度 $L_P=dist_s+\sum_{e\in P'} \Delta e$。
 
-2. 将 $P$ 和 $P'$ 中的所有边按照从 $s$ 到 $t$ 所经过的顺序依次排列，则对于 $P'$ 中相邻的两条边 $e_1,e_2$，有 $u_{e_2}$ 与 $v_{e_1}$ 相等或为其在 $T$ 上的祖先。因为在 $P$ 中 $e_1,e_2$ 直接相连或中间都为树边。
+2.  将 $P$ 和 $P'$ 中的所有边按照从 $s$ 到 $t$ 所经过的顺序依次排列，则对于 $P'$ 中相邻的两条边 $e_1,e_2$，有 $u_{e_2}$ 与 $v_{e_1}$ 相等或为其在 $T$ 上的祖先。因为在 $P$ 中 $e_1,e_2$ 直接相连或中间都为树边。
 
-3. 对于一个确定存在的 $P'$，有且仅有一个 $S$，使得 $S'=P'$。因为由于性质 $2$，$P'$ 中相邻的两条边的起点和终点之间在 $T$ 上只有一条路径。
+3.  对于一个确定存在的 $P'$，有且仅有一个 $S$，使得 $S'=P'$。因为由于性质 $2$，$P'$ 中相邻的两条边的起点和终点之间在 $T$ 上只有一条路径。
 
 ### 问题转化
 
@@ -126,7 +130,7 @@ $P'$ 有如下性质：
 
 那么问题转化为：求 $L_P$ 的值第 $k$ 小的满足性质 $2$ 的集合 $P'$。
 
-### 算法描述
+### 过程
 
 由于性质 $2$，我们可以记录按照从 $s$ 到 $t$ 的顺序排列的最后一条边和 $L_P$ 的值，来表示一个边集 $P'$。
 
@@ -136,17 +140,17 @@ $P'$ 有如下性质：
 
 每次取出堆顶的一个边集 $S$，有两种方法可以生成可能的新边集：
 
-1. 替换 $S$ 中的最后一条边为满足相同条件的 $\Delta e$ 更大的边。
+1.  替换 $S$ 中的最后一条边为满足相同条件的 $\Delta e$ 更大的边。
 
-2. 在最后一条边后接上一条边，设 $x$ 为 $S$ 中最后一条边的终点，由性质 $2$ 可得这条边需要满足其起点为 $x$ 或 $x$ 在 $T$ 上的祖先。
+2.  在最后一条边后接上一条边，设 $x$ 为 $S$ 中最后一条边的终点，由性质 $2$ 可得这条边需要满足其起点为 $x$ 或 $x$ 在 $T$ 上的祖先。
 
 将生成的新边集也加入小根堆。重复以上操作 $k-1$ 次后求出的就是从 $s$ 到 $t$ 的第 $k$ 短路。
 
 对于每个结点 $x$，我们将以其为起点的边的 $\Delta e$ 建成一个小根堆。为了方便查找一个结点 $x$ 与 $x$ 在 $T$ 上的祖先在小根堆上的信息，我们将这些信息合并在一个编号为 $x$ 的小根堆上。回顾以上生成新边集的方法，我们发现只要我们把紧接着可能的下一个边集加入小根堆，并保证这种生成方法可以覆盖所有可能的边集即可。记录最后选择的一条边在堆上对应的结点 $t$，有更优的方法生成新的边集：
 
-1. 替换 $S$ 中的最后一条边为 $t$ 在堆上的左右儿子对应的边。
+1.  替换 $S$ 中的最后一条边为 $t$ 在堆上的左右儿子对应的边。
 
-2. 在最后一条边后接上一条新的边，设 $x$ 为 $S$ 中最后一条边的终点，则接上编号为 $x$ 的小根堆的堆顶结点对应的边。
+2.  在最后一条边后接上一条新的边，设 $x$ 为 $S$ 中最后一条边的终点，则接上编号为 $x$ 的小根堆的堆顶结点对应的边。
 
 用这种方法，每次生成新的边集只会扩展出最多三个结点，小根堆中的结点总数是 $O(n+k)$。
 
@@ -163,7 +167,7 @@ $P'$ 有如下性质：
 询问时使用优先队列维护可并堆的根，对于可并堆堆顶的删除，直接将其左右儿子加入优先队列中，  
 就只需要 $O(k)$ 而非 $O(k\log m)$ 的空间。
 
-### 参考实现
+### 实现
 
 ```cpp
 #include <algorithm>
@@ -171,11 +175,11 @@ $P'$ 有如下性质：
 #include <cstring>
 #include <queue>
 using namespace std;
-const int maxn = 200010;
-int n, m, s, t, k, x, y, ww, cnt, fa[maxn];
+constexpr int MAXN = 200010;
+int n, m, s, t, k, x, y, ww, cnt, fa[MAXN];
 
 struct Edge {
-  int cur, h[maxn], nxt[maxn], p[maxn], w[maxn];
+  int cur, h[MAXN], nxt[MAXN], p[MAXN], w[MAXN];
 
   void add_edge(int x, int y, int z) {
     cur++;
@@ -186,8 +190,8 @@ struct Edge {
   }
 } e1, e2;
 
-int dist[maxn];
-bool tf[maxn], vis[maxn], ontree[maxn];
+int dist[MAXN];
+bool tf[MAXN], vis[MAXN], ontree[MAXN];
 
 struct node {
   int x, v;
@@ -212,8 +216,8 @@ void dfs(int x) {
 }
 
 struct LeftistTree {
-  int cnt, rt[maxn], lc[maxn * 20], rc[maxn * 20], dist[maxn * 20];
-  node v[maxn * 20];
+  int cnt, rt[MAXN], lc[MAXN * 20], rc[MAXN * 20], dist[MAXN * 20];
+  node v[MAXN * 20];
 
   LeftistTree() { dist[0] = -1; }
 
@@ -225,7 +229,7 @@ struct LeftistTree {
 
   int merge(int x, int y) {
     if (!x || !y) return x + y;
-    if (v[x] < v[y]) swap(x, y);
+    if (v[x] > v[y]) swap(x, y);
     int p = ++cnt;
     lc[p] = lc[x];
     v[p] = v[x];
